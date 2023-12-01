@@ -3,8 +3,16 @@ module github.com/OpenDataTelemetry/device-gateway-mqtt
 go 1.19
 
 require (
-	github.com/eclipse/paho.mqtt.golang v1.4.2 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
-	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0 // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
+	github.com/OpenDataTelemetry/decode v0.0.0-00010101000000-000000000000
+	github.com/confluentinc/confluent-kafka-go v1.9.2
+	github.com/eclipse/paho.mqtt.golang v1.4.2
+	github.com/google/uuid v1.3.1
 )
+
+require (
+	github.com/gorilla/websocket v1.4.2 // indirect
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
+)
+
+replace github.com/OpenDataTelemetry/decode => ../decode
