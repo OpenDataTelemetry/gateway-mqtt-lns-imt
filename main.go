@@ -52,7 +52,7 @@ func main() {
 	}
 
 	// KAFKA
-	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "localhost"})
+	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "quay-kafka"})
 	if err != nil {
 		panic(err)
 	}
@@ -77,11 +77,11 @@ func main() {
 		incoming := <-choke
 		lp, err := decode.LoraImt(incoming[1])
 		if err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
-		// fmt.Println(lp)
+		fmt.Println(lp)
 
-		topic := "smartcampusmaua"
+		topic := "OpenDataTelemetry-telegraf-smartcampusmaua"
 
 		p.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
