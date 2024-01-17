@@ -6,8 +6,6 @@ WORKDIR /app
 
 COPY go.mod go.sum ./
 
-COPY ./decode ./
-
 RUN go mod download
 
 COPY *.go ./
