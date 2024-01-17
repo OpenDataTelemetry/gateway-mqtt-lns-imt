@@ -1,6 +1,6 @@
 name: ci-build-golang-workflow
 on:
-  pull_request:
+  push:
     branches:
       - develop
 jobs:
@@ -28,7 +28,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           push: true
           tags: rogeriocassares/gateway-mqtt:0.1
