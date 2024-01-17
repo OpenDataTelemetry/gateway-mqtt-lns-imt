@@ -10,7 +10,7 @@ RUN go mod download
 
 COPY *.go ./
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /gateway-mqtt
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /gateway-mqtt
 
 # Run the tests in the container
 # FROM build-stage AS run-test-stage
