@@ -32,3 +32,4 @@ jobs:
         with:
           push: true
           tags: rogeriocassares/gateway-mqtt:0.1
+          
