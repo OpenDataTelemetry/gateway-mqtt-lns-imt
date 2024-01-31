@@ -81,7 +81,7 @@ func main() {
 		}
 		fmt.Println(lp)
 
-		topic := "OpenDataTelemetry-telegraf-smartcampusmaua"
+		topic := "SmartCampusMaua.smartcampusmaua"
 
 		p.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
