@@ -17,7 +17,7 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /gateway-mqtt
 # RUN go test -v ./...
 
 # Deploy the application binary into a lean image
-FROM gcr.io/distroless/base-debian12 AS build-release-stage
+FROM scratch AS build-release-stage
 
 WORKDIR /
 
