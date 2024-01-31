@@ -6,6 +6,5 @@ COPY *.go ./
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /gateway-mqtt
 
 FROM scratch
-WORKDIR /
 COPY --from=build /gateway-mqtt /gateway-mqtt
 ENTRYPOINT ["/gateway-mqtt"]
