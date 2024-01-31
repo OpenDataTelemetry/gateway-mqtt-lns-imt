@@ -31,4 +31,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: rogeriocassares/gateway-mqtt:0.2
+          tags: rogeriocassares/gateway-mqtt:0.3
