@@ -52,7 +52,7 @@ func main() {
 	}
 
 	// KAFKA
-	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "quay-kafka"})
+	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "my-cluster-kafka-bootstrap.test-kafka.svc.cluster.local"})
 	if err != nil {
 		panic(err)
 	}
