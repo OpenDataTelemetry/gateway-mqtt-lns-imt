@@ -129,14 +129,14 @@ func randDeviceData(deviceType string, i int) (string, string) {
 	case "WaterTankLevels":
 		var sdb strings.Builder // string data builder
 		deviceInfos := []deviceInfo{
-			{nodeName: "WaterTankLavel_1", devEUI: "0004a30b00001001"},
-			{nodeName: "WaterTankLavel_2", devEUI: "0004a30b00001002"},
-			{nodeName: "WaterTankLavel_3", devEUI: "0004a30b00001003"},
-			{nodeName: "WaterTankLavel_4", devEUI: "0004a30b00001004"},
-			{nodeName: "WaterTankLavel_5", devEUI: "0004a30b00001005"},
-			{nodeName: "WaterTankLavel_6", devEUI: "0004a30b00001006"},
-			{nodeName: "WaterTankLavel_7", devEUI: "0004a30b00001007"},
-			{nodeName: "WaterTankLavel_8", devEUI: "0004a30b00001008"},
+			{nodeName: "WaterTankLevel_1", devEUI: "0004a30b00001001"},
+			{nodeName: "WaterTankLevel_2", devEUI: "0004a30b00001002"},
+			{nodeName: "WaterTankLevel_3", devEUI: "0004a30b00001003"},
+			{nodeName: "WaterTankLevel_4", devEUI: "0004a30b00001004"},
+			{nodeName: "WaterTankLevel_5", devEUI: "0004a30b00001005"},
+			{nodeName: "WaterTankLevel_6", devEUI: "0004a30b00001006"},
+			{nodeName: "WaterTankLevel_7", devEUI: "0004a30b00001007"},
+			{nodeName: "WaterTankLevel_8", devEUI: "0004a30b00001008"},
 		}
 		j := float64(i)
 		if i >= len(deviceInfos) {
