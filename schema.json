@@ -1,0 +1,34 @@
+{
+    "organizations": [
+        {
+            "organization_name": "SmartCampusMaua",
+            "applications": [
+                {
+                    "application_name": "GMS",
+                    "devices": [
+                        {
+                            "device_name": "WaterTankLevel_1",
+                            "device_id": "0001",
+                            "device_type": "WaterTankLevel"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "organization_name": "SaoRafael",
+            "applications": [
+                {
+                    "application_name": "Health",
+                    "devices": [
+                        {
+                            "device_name": "HealthPack_1",
+                            "device_id": "0001",
+                            "device_type": "HealthPack"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
