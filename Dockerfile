@@ -9,6 +9,15 @@ FROM ${BUILDER_IMAGE} as builder
 # Ca-certificates is required to call HTTPS endpoints.
 RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
 
+WORKDIR /src
+ARG MODULE
+# librdkafka Build from source
+RUN git clone https://github.com/edenhill/librdkafka.git
+WORKDIR /src/librdkafka
+RUN ./configure --prefix /usr
+RUN make
+RUN make install
+
 # Create appuser
 ENV USER=appuser
 ENV UID=10001
@@ -22,7 +31,6 @@ RUN adduser \
     --no-create-home \
     --uid "${UID}" \
     "${USER}"
-RUN git clone https://github.com/edenhill/librdkafka.git && cd librdkafka && ./configure --prefix /usr && make && make install
 WORKDIR $GOPATH/src/github.com/OpenDataTelemetry/mqtt-topic-rewrite-lns-imt/
 COPY . .
 
