@@ -22,6 +22,7 @@ RUN adduser \
     --no-create-home \
     --uid "${UID}" \
     "${USER}"
+RUN git clone https://github.com/edenhill/librdkafka.git && cd librdkafka && ./configure --prefix /usr && make && make install
 WORKDIR $GOPATH/src/github.com/OpenDataTelemetry/mqtt-topic-rewrite-lns-imt/
 COPY . .
 
