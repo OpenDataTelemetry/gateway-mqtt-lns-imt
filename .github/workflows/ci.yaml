@@ -1,4 +1,4 @@
-name: ci-build-golang-workflow
+name: parse-mqtt-to-kafka-workflow
 on:
   push:
     branches:
@@ -31,4 +31,4 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: rogeriocassares/gateway-mqtt:0.3.4.5
+          tags: rogeriocassares/parse-mqtt-to-kafka:0.1
