@@ -9,12 +9,10 @@ FROM ${BUILDER_IMAGE} as builder
 # Ca-certificates is required to call HTTPS endpoints.
 RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
 
-WORKDIR /src
-ARG MODULE
-# librdkafka Build from source
+WORKDIR /root
 RUN git clone https://github.com/edenhill/librdkafka.git
-WORKDIR /src/librdkafka
-RUN /src/librdkafka/configure --prefix /usr
+WORKDIR /root/librdkafka
+RUN /root/librdkafka/configure
 RUN make
 RUN make install
 
