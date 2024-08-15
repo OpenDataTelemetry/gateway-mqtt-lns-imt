@@ -22,8 +22,8 @@ RUN adduser \
     --no-create-home \
     --uid "${UID}" \
     "${USER}"
-RUN git clone https://github.com/edenhill/librdkafka.git && cd librdkafka && ./configure --prefix /usr && make && make install
-WORKDIR $GOPATH/src/github.com/OpenDataTelemetry/mqtt-topic-rewrite-lns-imt/
+
+    WORKDIR $GOPATH/src/github.com/OpenDataTelemetry/mqtt-topic-rewrite-lns-imt/
 COPY . .
 
 # Fetch dependencies.
@@ -31,6 +31,7 @@ RUN go get -v
 
 # Build the binary
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
+    -tags musl \
     -ldflags='-w -s -extldflags "-static"' -a \
     -o /go/bin/hello .
 
