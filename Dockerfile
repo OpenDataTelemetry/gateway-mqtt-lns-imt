@@ -1,4 +1,4 @@
-ARG  BUILDER_IMAGE=golang:alpine
+ARG  BUILDER_IMAGE=golang:1.23.0-alpine3.20
 ############################
 # STEP 1 build executable binary
 ############################
@@ -8,13 +8,6 @@ FROM ${BUILDER_IMAGE} as builder
 # Git is required for fetching the dependencies.
 # Ca-certificates is required to call HTTPS endpoints.
 RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
-
-WORKDIR /root
-RUN git clone https://github.com/edenhill/librdkafka.git
-WORKDIR /root/librdkafka
-RUN /root/librdkafka/configure
-RUN make
-RUN make install
 
 # Create appuser
 ENV USER=appuser
@@ -29,6 +22,7 @@ RUN adduser \
     --no-create-home \
     --uid "${UID}" \
     "${USER}"
+RUN git clone https://github.com/edenhill/librdkafka.git && cd librdkafka && ./configure --prefix /usr && make && make install
 WORKDIR $GOPATH/src/github.com/OpenDataTelemetry/mqtt-topic-rewrite-lns-imt/
 COPY . .
 
