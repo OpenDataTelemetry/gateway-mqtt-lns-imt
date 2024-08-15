@@ -14,7 +14,7 @@ ARG MODULE
 # librdkafka Build from source
 RUN git clone https://github.com/edenhill/librdkafka.git
 WORKDIR /src/librdkafka
-RUN ./configure --prefix /usr
+RUN /src/librdkafka/configure --prefix /usr
 RUN make
 RUN make install
 
