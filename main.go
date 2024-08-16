@@ -1033,7 +1033,7 @@ PL: // Parse Loop
 		// 	i = i + 17
 
 		default:
-			fmt.Print("Data not parsed by decode.LoRaImt imtIotProtocolParser()\n")
+			// fmt.Print("Data not parsed by decode.LoRaImt imtIotProtocolParser()\n")
 			break PL
 		}
 	}
@@ -1066,7 +1066,7 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 	// B64 to Byte
 	b, err := b64ToByte(data)
 	if err != nil {
-		fmt.Print(data)
+		// fmt.Print(data)
 		log.Panic(err)
 	}
 
@@ -1345,7 +1345,7 @@ func main() {
 				if ev.TopicPartition.Error != nil {
 					fmt.Printf("Delivery failed: %v\n", ev.TopicPartition)
 				} else {
-					fmt.Printf("Delivered message to %v\n", ev.TopicPartition)
+					// fmt.Printf("Delivered message to %v\n", ev.TopicPartition)
 				}
 			}
 		}
@@ -1395,7 +1395,7 @@ func main() {
 
 		// return influx line protocol
 		// measurement,tags fields timestamp
-		fmt.Printf("InfluxLineProtocol: %s\n", kafkaMessage)
+		// fmt.Printf("InfluxLineProtocol: %s\n", kafkaMessage)
 
 		// SET KAFKA
 
