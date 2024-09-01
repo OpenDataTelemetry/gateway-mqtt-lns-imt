@@ -143,6 +143,24 @@ type Hydrometer struct {
 	BoardVoltage float64 `json:"boardVoltage"`
 }
 
+type EnergyMeter struct {
+	ForwardEnergy float64 `json:"forwardEnergy"`
+	ReverseEnergy float64 `json:"reverseEnergy"`
+	BoardVoltage  float64 `json:"boardVoltage"`
+}
+
+type LnsChirpStack_v4 struct {
+	// ApplicationID   string         `json:"applicationID"`
+	// ApplicationName string         `json:"applicationName"`
+	// NodeName        string         `json:"nodeName"`
+	// DevEUI          string         `json:"devEUI"`
+	// RxInfo          []LnsImtRxInfo `json:"rxInfo"`
+	// TxInfo          LnsImtTxInfo   `json:"txInfo"`
+	// FCnt            uint64         `json:"fCnt"`
+	// FPort           uint64         `json:"FPort"`
+	// Data            string         `json:"data"`
+}
+
 type LnsImt struct {
 	ApplicationID   string         `json:"applicationID"`
 	ApplicationName string         `json:"applicationName"`
@@ -181,9 +199,9 @@ type LnsImtTxInfo struct {
 
 // func protocolParserPort4(bytes []byte) string {
 // 	// 	var port4 Port4
-
+//
 // 	// 	len := len(bytes)
-
+//
 // 	// 	//   var decoded = {};
 // 	// 	//   var index = 0;
 // 	// 	//   var mask_sensor_int = bytes[index++];
@@ -191,7 +209,7 @@ type LnsImtTxInfo struct {
 // 	// 	//   var status_dry = ["OPEN", "CLOSED"];
 // 	// 	//   var status_relay = ["NO", "NC"];
 // 	// 	//   var novo_firmware = 0;
-
+//
 // 	// 	//  if (bytes.length > index)
 // 	// 	//  {
 // 	// 	//       if (mask_sensor_int & 0x19)
@@ -1133,6 +1151,19 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 			sb.WriteString(`,boardVoltage=`)
 			sb.WriteString(strconv.FormatFloat(hydrometer.BoardVoltage, 'f', -1, 64))
 
+		case "EnergyMeter":
+			var energyMeter EnergyMeter
+			energyMeter.ForwardEnergy = port100.X_0E_0
+			energyMeter.ReverseEnergy = port100.X_0E_1
+			energyMeter.BoardVoltage = port100.X_0C
+
+			sb.WriteString(`,forwardEnergy=`)
+			sb.WriteString(strconv.FormatFloat(energyMeter.ForwardEnergy, 'f', -1, 64))
+			sb.WriteString(`,reverseEnergy=`)
+			sb.WriteString(strconv.FormatFloat(energyMeter.ReverseEnergy, 'f', -1, 64))
+			sb.WriteString(`,boardVoltage=`)
+			sb.WriteString(strconv.FormatFloat(energyMeter.BoardVoltage, 'f', -1, 64))
+
 		default:
 		}
 
@@ -1198,7 +1229,45 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		lns.FType = "uplink"
 		lns.Data = lnsImt.Data
 
+	case "chirpstack_v4":
+		// lns.Measurement = measurement
+		// lns.DeviceId = lnsImt.DevEUI
+		// lns.RxInfoMac_0 = lnsImt.RxInfo[0].Mac
+		// lns.RxInfoTime_0 = lnsImt.RxInfo[0].Time.Unix() * 1000 * 1000 * 1000
+		// lns.RxInfoRssi_0 = lnsImt.RxInfo[0].Rssi
+		// lns.RxInfoSnr_0 = lnsImt.RxInfo[0].LoRaSNR
+		// lns.RxInfoLat_0 = lnsImt.RxInfo[0].Latitude
+		// lns.RxInfoLon_0 = lnsImt.RxInfo[0].Longitude
+		// lns.RxInfoAlt_0 = lnsImt.RxInfo[0].Altitude
+		// lns.TxInfoFrequency = lnsImt.TxInfo.Frequency / 1000000
+		// lns.TxInfoModulation = lnsImt.TxInfo.DataRate.Modulation
+		// lns.TxInfoBandWidth = lnsImt.TxInfo.DataRate.Bandwidth
+		// lns.TxInfoSpreadFactor = lnsImt.TxInfo.DataRate.SpreadFactor
+		// lns.TxInfoCodeRate = lnsImt.TxInfo.CodeRate
+		// lns.FCnt = lnsImt.FCnt
+		// lns.FPort = lnsImt.FPort
+		// lns.FType = "uplink"
+		// lns.Data = lnsImt.Data
+
 	case "atc":
+		// lns.Measurement = measurement
+		// lns.DeviceId = lnsImt.DevEUI
+		// lns.RxInfoMac_0 = lnsImt.RxInfo[0].Mac
+		// lns.RxInfoTime_0 = lnsImt.RxInfo[0].Time.Unix() * 1000 * 1000 * 1000
+		// lns.RxInfoRssi_0 = lnsImt.RxInfo[0].Rssi
+		// lns.RxInfoSnr_0 = lnsImt.RxInfo[0].LoRaSNR
+		// lns.RxInfoLat_0 = lnsImt.RxInfo[0].Latitude
+		// lns.RxInfoLon_0 = lnsImt.RxInfo[0].Longitude
+		// lns.RxInfoAlt_0 = lnsImt.RxInfo[0].Altitude
+		// lns.TxInfoFrequency = lnsImt.TxInfo.Frequency / 1000000
+		// lns.TxInfoModulation = lnsImt.TxInfo.DataRate.Modulation
+		// lns.TxInfoBandWidth = lnsImt.TxInfo.DataRate.Bandwidth
+		// lns.TxInfoSpreadFactor = lnsImt.TxInfo.DataRate.SpreadFactor
+		// lns.TxInfoCodeRate = lnsImt.TxInfo.CodeRate
+		// lns.FCnt = lnsImt.FCnt
+		// lns.FPort = lnsImt.FPort
+		// lns.FType = "uplink"
+		// lns.Data = lnsImt.Data
 
 	default:
 	}
