@@ -1286,7 +1286,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		lns.FType = "uplink"
 		lns.Data = lnsImt.Data
 
-	case "chirpstack_v4":
+	case "chirpstackv4":
 		json.Unmarshal([]byte(message), &lnsChirpStackV4)
 
 		lns.Measurement = measurement
