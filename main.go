@@ -149,16 +149,72 @@ type EnergyMeter struct {
 	BoardVoltage  float64 `json:"boardVoltage"`
 }
 
-type LnsChirpStack_v4 struct {
-	// ApplicationID   string         `json:"applicationID"`
-	// ApplicationName string         `json:"applicationName"`
-	// NodeName        string         `json:"nodeName"`
-	// DevEUI          string         `json:"devEUI"`
-	// RxInfo          []LnsImtRxInfo `json:"rxInfo"`
-	// TxInfo          LnsImtTxInfo   `json:"txInfo"`
-	// FCnt            uint64         `json:"fCnt"`
-	// FPort           uint64         `json:"FPort"`
-	// Data            string         `json:"data"`
+type LnsChirpStackV4 struct {
+	DeduplicationId string                    `json:"deduplicationId"`
+	DeviceInfo      LnsChirpStackV4DeviceInfo `json:"deviceInfo"`
+	DevAddr         string                    `json:"devAddr"`
+	Adr             bool                      `json:"adr"`
+	Dr              uint64                    `json:"dr"`
+	FCnt            uint64                    `json:"fCnt"`
+	FPort           uint64                    `json:"fPort"`
+	Confirmed       string                    `json:"Confirmed"`
+	RxInfo          []LnsChirpStackV4RxInfo   `json:"rxInfo"`
+	TxInfo          LnsChirpStackV4TxInfo     `json:"txInfo"`
+	Data            string                    `json:"data"`
+}
+
+type LnsChirpStackV4DeviceInfo struct {
+	TenantId           string `json:"tenantId"`
+	TenantName         string `json:"tenantName"`
+	ApplicationId      string `json:"applicationId"`
+	ApplicationName    string `json:"applicationName"`
+	DeviceProfileId    string `json:"deviceProfileId"`
+	DeviceProfileName  string `json:"deviceProfileName"`
+	DeviceName         string `json:"deviceName"`
+	DevEui             string `json:"devEui"`
+	DeviceClassEnabled string `json:"deviceClassEnabled"`
+	Tags               any    `json:"tags"`
+}
+
+type LnsChirpStackV4RxInfo struct {
+	GatewayId         string                  `json:"gatewayId"`
+	UplinkId          uint64                  `json:"uplinkId"`
+	NsTime            time.Time               `json:"nsTime"`
+	TimeSinceGpsEpoch string                  `json:"timeSinceGpsEpoch"`
+	Rssi              int64                   `json:"rssi"`
+	Snr               float64                 `json:"snr"`
+	Channel           uint64                  `json:"channel"`
+	Board             uint64                  `json:"board"`
+	Location          LnsChirpStackV4Location `json:"location"`
+	Context           string                  `json:"context"`
+	Metadata          LnsChirpStackV4Metadata `json:"metadata"`
+	CrcStatus         string                  `json:"crcStatus"`
+}
+
+type LnsChirpStackV4Location struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	Altitude  uint64  `json:"altitude"`
+}
+
+type LnsChirpStackV4Metadata struct {
+	Region_config_id   string `json:"region_config_id"`
+	Region_common_name string `json:"region_common_name"`
+}
+
+type LnsChirpStackV4TxInfo struct {
+	Frequency  float64                   `json:"frequency"`
+	Modulation LnsChirpStackV4Modulation `json:"modulation"`
+}
+
+type LnsChirpStackV4Modulation struct {
+	Lora LnsChirpStackV4Lora `json:"lora"`
+}
+
+type LnsChirpStackV4Lora struct {
+	Bandwidth       uint64 `json:"bandwidth"`
+	SpreadingFactor uint64 `json:"spreadingFactor"`
+	CodeRate        string `json:"codeRate"`
 }
 
 type LnsImt struct {
@@ -1197,6 +1253,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 	var sb strings.Builder
 	var lns Lns
 	var lnsImt LnsImt
+	var lnsChirpStackV4 LnsChirpStackV4
 	// var influx Influx
 	// var lnsAtc LnsAtc
 
@@ -1230,24 +1287,26 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		lns.Data = lnsImt.Data
 
 	case "chirpstack_v4":
-		// lns.Measurement = measurement
-		// lns.DeviceId = lnsImt.DevEUI
-		// lns.RxInfoMac_0 = lnsImt.RxInfo[0].Mac
-		// lns.RxInfoTime_0 = lnsImt.RxInfo[0].Time.Unix() * 1000 * 1000 * 1000
-		// lns.RxInfoRssi_0 = lnsImt.RxInfo[0].Rssi
-		// lns.RxInfoSnr_0 = lnsImt.RxInfo[0].LoRaSNR
-		// lns.RxInfoLat_0 = lnsImt.RxInfo[0].Latitude
-		// lns.RxInfoLon_0 = lnsImt.RxInfo[0].Longitude
-		// lns.RxInfoAlt_0 = lnsImt.RxInfo[0].Altitude
-		// lns.TxInfoFrequency = lnsImt.TxInfo.Frequency / 1000000
-		// lns.TxInfoModulation = lnsImt.TxInfo.DataRate.Modulation
-		// lns.TxInfoBandWidth = lnsImt.TxInfo.DataRate.Bandwidth
-		// lns.TxInfoSpreadFactor = lnsImt.TxInfo.DataRate.SpreadFactor
-		// lns.TxInfoCodeRate = lnsImt.TxInfo.CodeRate
-		// lns.FCnt = lnsImt.FCnt
-		// lns.FPort = lnsImt.FPort
-		// lns.FType = "uplink"
-		// lns.Data = lnsImt.Data
+		json.Unmarshal([]byte(message), &lnsChirpStackV4)
+
+		lns.Measurement = measurement
+		lns.DeviceId = lnsChirpStackV4.DeviceInfo.DevEui
+		lns.RxInfoMac_0 = lnsChirpStackV4.RxInfo[0].GatewayId
+		lns.RxInfoTime_0 = lnsChirpStackV4.RxInfo[0].NsTime.UnixNano()
+		lns.RxInfoRssi_0 = lnsChirpStackV4.RxInfo[0].Rssi
+		lns.RxInfoSnr_0 = lnsChirpStackV4.RxInfo[0].Snr
+		lns.RxInfoLat_0 = lnsChirpStackV4.RxInfo[0].Location.Latitude
+		lns.RxInfoLon_0 = lnsChirpStackV4.RxInfo[0].Location.Longitude
+		lns.RxInfoAlt_0 = lnsChirpStackV4.RxInfo[0].Location.Altitude
+		lns.TxInfoFrequency = lnsChirpStackV4.TxInfo.Frequency / 1000000
+		lns.TxInfoModulation = "LORA"
+		lns.TxInfoBandWidth = lnsChirpStackV4.TxInfo.Modulation.Lora.Bandwidth
+		lns.TxInfoSpreadFactor = lnsChirpStackV4.TxInfo.Modulation.Lora.SpreadingFactor
+		lns.TxInfoCodeRate = lnsChirpStackV4.TxInfo.Modulation.Lora.CodeRate
+		lns.FCnt = lnsChirpStackV4.FCnt
+		lns.FPort = lnsChirpStackV4.FPort
+		lns.FType = "uplink"
+		lns.Data = lnsChirpStackV4.Data
 
 	case "atc":
 		// lns.Measurement = measurement
