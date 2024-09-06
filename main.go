@@ -1292,7 +1292,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		lns.Measurement = measurement
 		lns.DeviceId = lnsChirpStackV4.DeviceInfo.DevEui
 		lns.RxInfoMac_0 = lnsChirpStackV4.RxInfo[0].GatewayId
-		lns.RxInfoTime_0 = lnsChirpStackV4.RxInfo[0].NsTime.UnixNano()
+		lns.RxInfoTime_0 = lnsChirpStackV4.RxInfo[0].NsTime.Unix()
 		lns.RxInfoRssi_0 = lnsChirpStackV4.RxInfo[0].Rssi
 		lns.RxInfoSnr_0 = lnsChirpStackV4.RxInfo[0].Snr
 		lns.RxInfoLat_0 = lnsChirpStackV4.RxInfo[0].Location.Latitude
