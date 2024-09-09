@@ -1286,13 +1286,13 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		lns.FType = "uplink"
 		lns.Data = lnsImt.Data
 
-	case "chirpstackv4":
+	case "chirpstack_v4":
 		json.Unmarshal([]byte(message), &lnsChirpStackV4)
 
 		lns.Measurement = measurement
 		lns.DeviceId = lnsChirpStackV4.DeviceInfo.DevEui
 		lns.RxInfoMac_0 = lnsChirpStackV4.RxInfo[0].GatewayId
-		lns.RxInfoTime_0 = lnsChirpStackV4.RxInfo[0].NsTime.UnixNano()
+		lns.RxInfoTime_0 = lnsChirpStackV4.RxInfo[0].NsTime.Unix()
 		lns.RxInfoRssi_0 = lnsChirpStackV4.RxInfo[0].Rssi
 		lns.RxInfoSnr_0 = lnsChirpStackV4.RxInfo[0].Snr
 		lns.RxInfoLat_0 = lnsChirpStackV4.RxInfo[0].Location.Latitude
@@ -1461,20 +1461,40 @@ func main() {
 	// kafkaProdClient, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "my-cluster-kafka-bootstrap.test-kafka.svc.cluster.local"})
 	kafkaProdClient, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": kafkaBroker})
 	if err != nil {
-		panic(err)
+		// panic(err)
+		fmt.Printf("Failed to create producer: %s\n", err)
+		os.Exit(1)
 	}
-	defer kafkaProdClient.Close()
+	// defer kafkaProdClient.Close()
+	fmt.Printf("Created Producer %v\n", kafkaProdClient)
 
 	// Delivery report handler for produced messages
 	go func() {
 		for e := range kafkaProdClient.Events() {
 			switch ev := e.(type) {
 			case *kafka.Message:
-				if ev.TopicPartition.Error != nil {
-					fmt.Printf("Delivery failed: %v\n", ev.TopicPartition)
+				// The message delivery report, indicating success or
+				// permanent failure after retries have been exhausted.
+				// Application level retries won't help since the client
+				// is already configured to do that.
+				m := ev
+				if m.TopicPartition.Error != nil {
+					fmt.Printf("Delivery failed: %v\n", m.TopicPartition.Error)
 				} else {
-					// fmt.Printf("Delivered message to %v\n", ev.TopicPartition)
+					fmt.Printf("Delivered message to topic %s [%d] at offset %v\n",
+						*m.TopicPartition.Topic, m.TopicPartition.Partition, m.TopicPartition.Offset)
 				}
+			case kafka.Error:
+				// Generic client instance-level errors, such as
+				// broker connection failures, authentication issues, etc.
+				//
+				// These errors should generally be considered informational
+				// as the underlying client will automatically try to
+				// recover from any errors encountered, the application
+				// does not need to take action on them.
+				fmt.Printf("Error: %v\n", ev)
+			default:
+				fmt.Printf("Ignored event: %s\n", ev)
 			}
 		}
 	}()
@@ -1530,11 +1550,31 @@ func main() {
 		kafkaProdTopic := sbKafkaProdTopic.String()
 		// pClient.Publish(sbPubTopic.String(), byte(pQos), false, incoming[1])
 
-		kafkaProdClient.Produce(&kafka.Message{
+		// kafkaProdClient.Produce(&kafka.Message{
+		// 	TopicPartition: kafka.TopicPartition{Topic: &kafkaProdTopic, Partition: kafka.PartitionAny},
+		// 	Value:          []byte(kafkaMessage),
+		// }, nil)
+
+		err = kafkaProdClient.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &kafkaProdTopic, Partition: kafka.PartitionAny},
 			Value:          []byte(kafkaMessage),
+			Headers:        []kafka.Header{{Key: "myTestHeader", Value: []byte("header values are binary")}},
 		}, nil)
 
-		kafkaProdClient.Flush(15 * 1000)
+		if err != nil {
+			if err.(kafka.Error).Code() == kafka.ErrQueueFull {
+				// Producer queue is full, wait 1s for messages
+				// to be delivered then try again.
+				time.Sleep(time.Second)
+				continue
+			}
+			fmt.Printf("Failed to produce message: %v\n", err)
+		}
+
+		// kafkaProdClient.Flush(15 * 1000)
+		for kafkaProdClient.Flush(10000) > 0 {
+			fmt.Print("Still waiting to flush outstanding messages\n", err)
+		}
+		kafkaProdClient.Close()
 	}
 }
