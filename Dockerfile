@@ -2,7 +2,7 @@ ARG  BUILDER_IMAGE=golang:1.23.1-alpine3.20
 ############################
 # STEP 1 build executable binary
 ############################
-FROM ${BUILDER_IMAGE} as builder
+FROM ${BUILDER_IMAGE} AS builder
 
 # Install git + SSL ca certificates.
 # Git is required for fetching the dependencies.
