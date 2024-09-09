@@ -1402,6 +1402,8 @@ func main() {
 	ORGANIZATION := os.Getenv("ORGANIZATION")
 	DEVICE_TYPE := os.Getenv("DEVICE_TYPE")
 	BUCKET := os.Getenv("BUCKET")
+	MQTT_BROKER := os.Getenv("MQTT_BROKER")
+	kafkaBroker := os.Getenv("KAFKA_BROKER")
 
 	// MqttSubscriberClient
 	var sbMqttSubClientId strings.Builder
@@ -1428,7 +1430,7 @@ func main() {
 	sbKafkaProdTopic.WriteString(BUCKET)
 
 	// MQTT
-	mqttSubBroker := "mqtt://mqtt.maua.br:1883"
+	mqttSubBroker := MQTT_BROKER
 	mqttSubClientId := sbMqttSubClientId.String()
 	mqttSubUser := "public"
 	mqttSubPassword := "public"
@@ -1459,7 +1461,6 @@ func main() {
 	}
 
 	// KAFKA
-	kafkaBroker := os.Getenv("KAFKA_BROKER")
 	// kafkaProdClient, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": "my-cluster-kafka-bootstrap.test-kafka.svc.cluster.local"})
 	kafkaProdClient, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": kafkaBroker})
 	if err != nil {
