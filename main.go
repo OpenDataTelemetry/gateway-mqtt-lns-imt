@@ -2006,6 +2006,11 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 // 	return s
 // }
 
+func connLostHandler(c MQTT.Client, err error) {
+	fmt.Printf("Connection lost, reason: %v\n", err)
+	os.Exit(1)
+}
+
 func main() {
 	id := uuid.New().String()
 	ORGANIZATION := os.Getenv("ORGANIZATION")
@@ -2050,6 +2055,7 @@ func main() {
 	mqttSubOpts.SetClientID(mqttSubClientId)
 	mqttSubOpts.SetUsername(mqttSubUser)
 	mqttSubOpts.SetPassword(mqttSubPassword)
+	mqttSubOpts.SetConnectionLostHandler(connLostHandler)
 
 	c := make(chan [2]string)
 
