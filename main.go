@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -71,30 +72,28 @@ type Port100 struct {
 }
 
 type Port4 struct {
-	X_01   float64 `json:"01"`
-	X_02   float64 `json:"02"`
-	X_03_0 float64 `json:"03_0"`
-	X_03_1 float64 `json:"03_1"`
-	X_04   uint64  `json:"04"`
-	X_05   uint64  `json:"05"`
-	X_06   uint64  `json:"06"`
-	X_07   uint64  `json:"07"`
-	X_08   uint64  `json:"08"`
-	X_09   uint64  `json:"09"`
-	X_0A_0 float64 `json:"0A_0"`
-	X_0A_1 float64 `json:"0A_1"`
-	X_0B   uint64  `json:"0B"`
-	X_0C   float64 `json:"0C"`
-	X_0D_0 uint64  `json:"0D_0"`
-	X_0D_1 uint64  `json:"0D_1"`
-	X_0D_2 uint64  `json:"0D_2"`
-	X_0D_3 uint64  `json:"0D_3"`
-	X_0E_0 float64 `json:"0E_0"`
-	X_0E_1 float64 `json:"0E_1"`
-	X_10   uint64  `json:"10"`
-	X_11   float64 `json:"11"`
-	X_12   uint64  `json:"12"`
-	X_13   uint64  `json:"13"`
+	InternalTemperature    float64
+	InternalHumidity       float64
+	EmwRainLevel           float64
+	EmwAvgWindSpeed        uint64
+	EmwGustWindSpeed       uint64
+	EmwWindDirection       uint64
+	EmwTemperature         float64
+	EmwHumidity            uint64
+	EmwLuminosity          uint64
+	EmwUv                  float64
+	EmwSolarRadiation      float64
+	EmwAtmPres             float64
+	EnvSensorStatus        string
+	InternalBatteryVoltage float64
+	IsBattery              bool
+	FirmwareVersion        string
+	C1State                string
+	C1Count                uint64
+	C2State                string
+	C2Count                uint64
+	Power                  string
+	IsFirmware             bool
 }
 type SmartLight struct {
 	Temperature    float64 `json:"temperature"`
@@ -113,24 +112,21 @@ type WaterTankLevel struct {
 type WeatherStation struct {
 	InternalTemperature float64 `json:"internalTemperature"`
 	InternalHumidity    float64 `json:"internalHumidity"`
-	RainGauge           float64 `json:"rainLevel"`
-	AvgWindSpeed        float64 `json:"avgWindSpeed"`
-	GustWindSpeed       float64 `json:"gustWindSpeed"`
-	WindDirection       string  `json:"windDirection"`
-	Temperature         float64 `json:"temperature"`
-	Humidity            float64 `json:"humidity"`
-	Luminosity          float64 `json:"luminosity"`
-	Uv                  float64 `json:"uv"`
-	SolarRadiation      float64 `json:"solarRadiation"`
+	C1State             string  `json:"c1State"`
+	C1Count             uint64  `json:"c1Count"`
+	C2State             string  `json:"c2State"`
+	C2Count             uint64  `json:"c2Count"`
+	EwmRainLevel        float64 `json:"rainLevel"`
+	EwmAvgWindSpeed     uint64  `json:"avgWindSpeed"`
+	EwmGustWindSpeed    uint64  `json:"gustWindSpeed"`
+	EwmWindDirection    uint64  `json:"windDirection"`
+	EwmTemperature      float64 `json:"temperature"`
+	EwmHumidity         uint64  `json:"humidity"`
+	EwmLuminosity       uint64  `json:"luminosity"`
+	EwmUv               float64 `json:"uv"`
+	EwmSolarRadiation   float64 `json:"solarRadiation"`
+	EmwAtmPres          float64 `json:"atmPressure"`
 }
-
-// Wind direction
-// Wind velocity
-// Rain gauge
-// Temperature
-// Humidity
-// UV Radiation
-// Atmospheric pressure
 
 type GaugePressure struct {
 	InletPressure  float64 `json:"outletPressure"`
@@ -253,1187 +249,344 @@ type LnsImtTxInfo struct {
 	CodeRate  string         `json:"codeRate"`
 }
 
-// func protocolParserPort4(bytes []byte) string {
-// 	// 	var port4 Port4
-//
-// 	// 	len := len(bytes)
-// NEW
-// Decode uplink function.
-//
-// Input is an object with the following fields:
-// - bytes = Byte array containing the uplink payload, e.g. [255, 230, 255, 0]
-// - fPort = Uplink fPort.
-// - variables = Object containing the configured device variables.
-//
-// Output must be an object with the following fields:
-// - data = Object representing the decoded payload.
-
-// function decodeUplink(input) {
-// 	let data = {};
-// 	let index = 0;
-
-// 	data.device = [];
-// 	data.internal_sensors = [];
-// 	data.drys = [];
-// 	data.probes = [];
-// 	data.modules = [];
-// 	data.lorawan = [];
-
-// 	if (input.fPort !== 1) {
-
-// 			if (input.fPort < 3 || input.fPort > 4) {
-// 					return {
-// 							errors: ['invalid fPort'],
-// 					};
-// 			}
-
-// 			// Decode Model
-// 			data.device.push({
-// 					n: 'model',
-// 					v: input.fPort == 3 ? 'NIT 20LI' : 'NIT 21LI'
-// 			});
-
-// 			let mask_sensor_inte = {};
-// 			let mask_sensor_int = {};
-// 			let mask_sensor_ext = {};
-
-// 			mask_sensor_int = input.bytes[index++];
-
-// 			// If Extented Internal Sensor Mask
-// 			if (mask_sensor_int >> 7 & 0x01) {
-// 					mask_sensor_inte = input.bytes[index++];
-// 			}
-
-// 			mask_sensor_ext = input.bytes[index++];
-
-// 			// Environment Sensor
-// 			if (mask_sensor_inte >> 0 & 0x01) {
-// 					data.device.push({
-// 							n: 'env_sensor_status',
-// 							v: 'fail'
-// 					});
-// 			}
-
-// 			// Decode Battery
-// 			if (mask_sensor_int >> 0 & 0x01) {
-// 					let battery = { n: 'battery', u: 'V' };
-// 					if (mask_sensor_int >> 6 & 0x01) {
-// 							battery.v = ((input.bytes[index++] / 120.0) + 1).round(2);
-// 					}
-// 					else {
-// 							battery.v = (input.bytes[index++] / 10.0).round(1);
-// 					}
-// 					data.internal_sensors.push(battery);
-// 			}
-
-// 			// Decode Firmware Version
-// 			if (mask_sensor_int >> 2 & 0x01) {
-// 					let firmware = { n: 'firmware_version' };
-// 					firmware.v = input.bytes[index++] | (input.bytes[index++] << 8) | (input.bytes[index++] << 16);
-// 					let hardware = (firmware.v / 1000000) >>> 0;
-// 					let compatibility = ((firmware.v / 10000) - (hardware * 100)) >>> 0;
-// 					let feature = ((firmware.v - (hardware * 1000000) - (compatibility * 10000)) / 100) >>> 0;
-// 					let bug = (firmware.v - (hardware * 1000000) - (compatibility * 10000) - (feature * 100)) >>> 0;
-// 					firmware.v = hardware + '.' + compatibility + '.' + feature + '.' + bug;
-// 					data.device.push(firmware);
-// 			}
-
-// 			// Decode External Power or Battery
-// 			data.device.push({
-// 					n: 'power',
-// 					v: (mask_sensor_int >> 5 & 0x01) ? 'external' : 'battery'
-// 			});
-
-// 			// Decode Temperature Int
-// 			if (mask_sensor_int >> 3 & 0x01) {
-// 					data.internal_sensors.push({
-// 							n: 'temperature',
-// 							v: (((input.bytes[index++] | (input.bytes[index++] << 8)) / 100.0) - 273.15).round(2),
-// 							u: 'C'
-// 					});
-// 			}
-
-// 			// Decode Moisture Int
-// 			if (mask_sensor_int >> 4 & 0x01) {
-// 					data.internal_sensors.push({
-// 							n: 'humidity',
-// 							v: ((input.bytes[index++] | (input.bytes[index++] << 8)) / 10).round(2),
-// 							u: '%'
-// 					});
-// 			}
-
-// 			// Decode Drys
-// 			if (mask_sensor_ext & 0x0F) {
-// 					// Decode Dry 1 State
-// 					if (mask_sensor_ext >> 0 & 0x01) {
-// 							data.drys.push({
-// 									n: 'c1_state',
-// 									v: input.bytes[index++] ? 'closed' : 'open',
-// 									u: 'boolean'
-// 							});
-// 					}
-
-// 					// Decode Dry 1 Count
-// 					if (mask_sensor_ext >> 1 & 0x01) {
-// 							data.drys.push({
-// 									n: 'c1_count',
-// 									v: input.bytes[index++] | (input.bytes[index++] << 8)
-// 							});
-// 					}
-
-// 					// Decode Dry 2 State
-// 					if (mask_sensor_ext >> 2 & 0x01) {
-// 							data.drys.push({
-// 									n: 'c2_state',
-// 									v: input.bytes[index++] ? 'closed' : 'open',
-// 									u: 'boolean'
-// 							});
-// 					}
-
-// 					// Decode Dry 2 Count
-// 					if (mask_sensor_ext >> 3 & 0x01) {
-// 							data.drys.push({
-// 									n: 'c2_count',
-// 									v: input.bytes[index++] | (input.bytes[index++] << 8)
-// 							});
-// 					}
-// 			}
-
-// 			// Decode DS18B20 Probe
-// 			if (mask_sensor_ext >> 4 & 0x07) {
-// 					let nb_probes = (mask_sensor_ext >> 4 & 0x07) >>> 0;
-// 					for (let i = 0; i < nb_probes; i++) {
-// 							let probe = { u: 'C' };
-// 							let rom = {};
-
-// 							probe.v = (((input.bytes[index++] | (input.bytes[index++] << 8)) / 100.0) - 273.15).round(2);
-// 							if (mask_sensor_ext >> 7 & 0x01) {
-// 									index += 7;
-// 									rom = (input.bytes[index--]).toString(16);
-// 									for (let j = 0; j < 7; j++) {
-// 											rom += (input.bytes[index--]).toString(16);
-// 									}
-// 									index += 9;
-// 							} else {
-// 									rom = input.bytes[index++];
-// 							}
-// 							probe.n = 'temperature' + '_' + rom;
-// 							data.probes.push(probe);
-// 					}
-// 			}
-
-// 			// Decode Extension Module(s).
-// 			if (input.bytes.length > index) {
-// 					while (input.bytes.length > index) {
-// 							switch (input.bytes[index]) {
-// 									case 1:
-// 											{
-// 													index++;
-// 													let mask_ems104 = input.bytes[index++];
-
-// 													// E1
-// 													if (mask_ems104 >> 0 & 0x01) {
-// 															data.modules.push({
-// 																	n: 'ems_e1_temp',
-// 																	v: (((input.bytes[index++] | input.bytes[index++] << 8) / 100.0) - 273.15).round(2),
-// 																	u: 'C'
-// 															});
-// 													}
-
-// 													// KPA
-// 													for (let k = 0; k < 3; k++) {
-// 															if (mask_ems104 >> (k + 1) & 0x01) {
-// 																	data.modules.push({
-// 																			n: 'ems_e' + k + 2 + '_kpa',
-// 																			v: ((input.bytes[index++] | (input.bytes[index++] << 8)) / 100.0).round(2),
-// 																			u: 'kPa',
-// 																	});
-// 															}
-// 													}
-// 											}
-// 											break;
-
-// 									case 2:
-// 											{
-// 													index++;
-// 													let mask_emc104 = input.bytes[index++];
-
-// 													// Plus (Min Max and Avg)
-// 													if (mask_emc104 >> 4 & 0x01) {
-// 															for (let k = 0; k < 4; k++) {
-// 																	if ((mask_emc104 >> k) & 0x01) {
-// 																			let conn = {};
-// 																			conn.n = 'e' + (k + 1) + '_curr';
-// 																			conn.u = "mA";
-// 																			// Min
-// 																			if (mask_emc104 >> 5 & 0x01) {
-// 																					conn.min = input.bytes[index++] / 12.0;
-// 																			}
-// 																			// Max
-// 																			if (mask_emc104 >> 6 & 0x01) {
-// 																					conn.max = input.bytes[index++] / 12.0;
-// 																			}
-// 																			// Avg
-// 																			if (mask_emc104 >> 7 & 0x01) {
-// 																					conn.avg = input.bytes[index++] / 12.0;
-// 																			}
-// 																			data.modules.push(conn);
-// 																	}
-// 															}
-// 													} else {
-// 															for (let k = 0; k < 4; k++) {
-// 																	if (mask_emc104 >> k & 0x01) {
-// 																			data.modules.push({
-// 																					n: 'emc_e' + (k + 1) + '_curr',
-// 																					v: ((input.bytes[index++] | (input.bytes[index++] << 8)) / 1000.0).round(1),
-// 																					u: 'mA'
-// 																			});
-// 																	}
-// 															}
-// 													}
-// 											}
-// 											break;
-
-// 									// EM W104
-// 									case 4:
-// 											{
-// 													index++;
-// 													let mask_emw104 = input.bytes[index++];
-
-// 													//Weather Station
-// 													if (mask_emw104 >> 0 & 0x01) {
-// 															//Rain
-// 															data.modules.push({
-// 																	n: 'emw_rain_lvl',
-// 																	v: (((input.bytes[index++] << 8) | input.bytes[index++]) / 10.0).round(1),
-// 																	u: 'mm'
-// 															});
-
-// 															//Average Wind Speed
-// 															data.modules.push({
-// 																	n: 'emw_avg_wind_speed',
-// 																	v: input.bytes[index++],
-// 																	u: 'km/h'
-// 															});
-
-// 															//Gust Wind Speed
-// 															data.modules.push({
-// 																	n: 'emw_gust_wind_speed',
-// 																	v: input.bytes[index++],
-// 																	u: 'km/h'
-// 															});
-
-// 															//Wind Direction
-// 															data.modules.push({
-// 																	n: 'emw_wind_direction',
-// 																	v: (input.bytes[index++] << 8) | input.bytes[index++],
-// 																	u: 'graus'
-// 															});
-
-// 															//Temperature
-// 															data.modules.push({
-// 																	n: 'emw_temperature',
-// 																	v: ((((input.bytes[index++] << 8) | input.bytes[index++]) / 10.0) - 273.15).round(2),
-// 																	u: 'C'
-// 															});
-
-// 															//Humidity
-// 															data.modules.push({
-// 																	n: 'emw_humidity',
-// 																	v: input.bytes[index++],
-// 																	u: '%'
-// 															});
-
-// 															//Lux and UV
-// 															if (mask_emw104 >> 1 & 0x01) {
-// 																	data.modules.push({
-// 																			n: 'emw_luminosity',
-// 																			v: (input.bytes[index++] << 16) | (input.bytes[index++] << 8) | input.bytes[index++],
-// 																			u: 'lx'
-// 																	});
-
-// 																	data.modules.push({
-// 																			n: 'emw_uv',
-// 																			v: (input.bytes[index++] / 10.0).round(1),
-// 																			u: '/'
-// 																	});
-// 															}
-// 													}
-
-// 													//Pyranometer
-// 													if (mask_emw104 >> 2 & 0x01) {
-// 															data.modules.push({
-// 																	n: 'emw_solar_radiation',
-// 																	v: ((input.bytes[index++] << 8 | input.bytes[index++]) / 10.0).round(1),
-// 																	u: 'W/m²'
-// 															});
-// 													}
-
-// 													//Barometer
-// 													if (mask_emw104 >> 3 & 0x01) {
-// 															data.modules.push({
-// 																	n: 'emw_atm_pres',
-// 																	v: ((input.bytes[index++] << 16 | input.bytes[index++] << 8 | input.bytes[index++] << 0) / 100.0).round(2),
-// 																	u: 'hPa²'
-// 															});
-// 													}
-// 											}
-// 											break;
-
-// 									// EM R102
-// 									case 5:
-// 											{
-// 													index++;
-// 													let mask_emr102 = input.bytes[index++];
-// 													let mask_data = input.bytes[index++];
-
-// 													// E1
-// 													if (mask_emr102 >> 0 & 0x01) {
-// 															data.modules.push({
-// 																	n: 'emr_c3_status',
-// 																	v: (mask_data >> 0 & 0x01) ? 'closed' : 'open',
-// 																	u: 'bool'
-// 															});
-
-// 															data.modules.push({
-// 																	n: 'emr_c3_count',
-// 																	v: input.bytes[index++] | input.bytes[index++] << 8,
-// 															});
-// 													}
-
-// 													// E2
-// 													if (mask_emr102 >> 1 & 0x01) {
-// 															data.modules.push({
-// 																	n: 'emr_c4_status',
-// 																	v: (mask_data >> 1 & 0x01) ? 'closed' : 'open',
-// 																	u: 'bool'
-// 															});
-
-// 															data.modules.push({
-// 																	n: 'emr_c4_count',
-// 																	v: input.bytes[index++] | input.bytes[index++] << 8,
-// 															});
-// 													}
-
-// 													// E3
-// 													if (mask_emr102 >> 2 & 0x01) {
-// 															data.modules.push({
-// 																	n: 'emr_b3_relay',
-// 																	v: (mask_data >> 2 & 0x01) ? 'NC' : 'NO'
-// 															});
-// 													}
-
-// 													// E4
-// 													if (mask_emr102 >> 3 & 0x01) {
-// 															data.modules.push({
-// 																	n: 'emr_b4_relay',
-// 																	v: (mask_data >> 3 & 0x01) ? 'NC' : 'NO'
-// 															});
-// 													}
-
-// 											}
-// 											break;
-
-// 									// EM ACW100 & EM THW 100/200/201
-// 									case 6:
-// 											{
-// 													index++;
-// 													let rom = {};
-// 													let prefix_name = {};
-// 													let one_wire_ext_model = 0x00;
-// 													let mask_em_acw_thw = input.bytes[index++];
-// 													const em_thw_acw_name = ['em_thw_200', 'em_acw_100', 'em_thw_201', 'unknown', 'unknown', 'em_thw_100'];
-
-// 													if (mask_em_acw_thw == 0x03) {
-// 															one_wire_ext_model = 0x06;
-// 													}
-// 													else {
-// 															if (mask_em_acw_thw >> 0 & 0x01) {
-// 																	one_wire_ext_model |= 0x01;
-// 															}
-
-// 															if (mask_em_acw_thw >> 4 & 0x01) {
-// 																	one_wire_ext_model |= 0x02;
-// 															}
-// 													}
-
-// 													prefix_name = em_thw_acw_name[one_wire_ext_model - 1];
-
-// 													//ROM
-// 													if ((mask_sensor_ext >> 4 & 0x07) && (mask_sensor_ext >> 7 & 0x00)) {
-// 															rom = input.bytes[index++];
-// 													} else {
-// 															index += 7;
-// 															rom = (input.bytes[index--]).toString(16);
-
-// 															for (let j = 0; j < 7; j++) {
-// 																	rom += (input.bytes[index--]).toString(16);
-// 															}
-// 															index += 9;
-// 													}
-
-// 													//Temperature
-// 													if (mask_em_acw_thw >> 0 & 0x01) {
-// 															data.modules.push({
-// 																	n: prefix_name + '_' + 'temperature' + '_' + rom,
-// 																	v: (((input.bytes[index++] | (input.bytes[index++] << 8)) / 100.0) - 273.15).round(2),
-// 																	u: 'C'
-// 															});
-// 													}
-
-// 													//Humidity
-// 													if (mask_em_acw_thw >> 1 & 0x01) {
-// 															data.modules.push({
-// 																	n: prefix_name + '_' + 'humidity' + '_' + rom,
-// 																	v: ((input.bytes[index++] | (input.bytes[index++] << 8)) / 100.0).round(2),
-// 																	u: '%'
-// 															});
-// 													}
-
-// 													//Lux
-// 													if (mask_em_acw_thw >> 2 & 0x01) {
-// 															data.modules.push({
-// 																	n: prefix_name + '_' + 'luminosity' + '_' + rom,
-// 																	v: input.bytes[index++] | (input.bytes[index++] << 8),
-// 																	u: 'lux'
-// 															});
-// 													}
-
-// 													//Noise
-// 													if (mask_em_acw_thw >> 3 & 0x01) {
-// 															data.modules.push({
-// 																	n: prefix_name + '_' + 'noise' + '_' + rom,
-// 																	v: ((input.bytes[index++] | (input.bytes[index++] << 8)) / 100.0).round(2),
-// 																	u: 'dB'
-// 															});
-// 													}
-
-// 													//Temperature RTDT
-// 													if (mask_em_acw_thw >> 4 & 0x01) {
-// 															data.modules.push({
-// 																	n: prefix_name + '_' + 'temperature_rtdt' + '_' + rom,
-// 																	v: (((input.bytes[index++] | (input.bytes[index++] << 8) | (input.bytes[index++] << 16) | (input.bytes[index++] << 24)) / 100.0) - 273.15).round(2),
-// 																	u: 'C'
-// 															});
-// 													}
-// 											}
-// 											break;
-
-// 									default:
-// 											{
-// 													return { data };
-// 											}
-// 							}
-// 					}
-// 			}
-
-// 	}
-// 	else {
-// 			const status_enable = ["disable", "enable"];
-// 			let mask_lorawan = (input.bytes[index++] << 8) | input.bytes[index++];
-// 			let mask_device = (input.bytes[index++] << 8) | input.bytes[index++];
-
-// 			// LoRaWAN Configuration
-// 			if (mask_lorawan !== 0) {
-// 					if (mask_lorawan >> 0 & 0x01) {
-// 							let time_report = ((input.bytes[index++] << 8) | input.bytes[index++]) * 60;
-// 							data.lorawan.push({
-// 									n: 'time_report',
-// 									u: 'seconds',
-// 									v: time_report ? time_report : 30
-// 							});
-// 					}
-
-// 					if (mask_lorawan >> 4 & 0x01) {
-// 							data.lorawan.push({
-// 									n: 'adr',
-// 									v: status_enable[input.bytes[index++]]
-// 							});
-// 					}
-
-// 					if (mask_lorawan >> 7 & 0x01) {
-// 							const regions = ["AS923", "AU915", "CN470", "CN779", "EU433", "EU868", "KR920", "IN865", "US915", "RU864", "LA915"];
-// 							data.lorawan.push({
-// 									n: 'region',
-// 									v: regions[input.bytes[index++]]
-// 							});
-// 					}
-
-// 					if (mask_lorawan >> 9 & 0x01) {
-// 							data.lorawan.push({
-// 									n: 'confirmed_message',
-// 									v: status_enable[input.bytes[index++]]
-// 							});
-// 					}
-// 			}
-
-// 			// Device Configuration
-// 			if (mask_device !== 0) {
-// 					if (mask_device >> 0 & 0x01) {
-// 							data.device.push({
-// 									n: 'delta_enable',
-// 									v: status_enable[input.bytes[index++]],
-// 									u: 'bool'
-// 							});
-
-// 							data.device.push({
-// 									n: 'delta_internal_temp',
-// 									v: (input.bytes[index++] / 10.0),
-// 									u: 'C'
-// 							});
-
-// 							data.device.push({
-// 									n: 'delta_internal_humi',
-// 									v: (input.bytes[index++] / 10.0),
-// 									u: '%'
-// 							});
-
-// 							data.device.push({
-// 									n: 'delta_probe_temp',
-// 									v: (input.bytes[index++] / 10.0),
-// 									u: 'C'
-// 							});
-// 					}
-
-// 					if (mask_device >> 1 & 0x01) {
-// 							let dry_mask = input.bytes[index++];
-
-// 							data.device.push({
-// 									n: 'dry1_behavior',
-// 									v: (dry_mask >> 0 & 0x01) ? 'high_frequency' : 'event'
-// 							});
-
-// 							data.device.push({
-// 									n: 'dry2_behavior',
-// 									v: (dry_mask >> 1 & 0x01) ? 'high_frequency' : 'event'
-// 							});
-
-// 							data.device.push({
-// 									n: 'dry1_send_periodic',
-// 									v: (dry_mask >> 2 & 0x01) ? 'enable' : 'disable'
-// 							});
-
-// 							data.device.push({
-// 									n: 'dry2_send_periodic',
-// 									v: (dry_mask >> 3 & 0x01) ? 'enable' : 'disable'
-// 							});
-// 					}
-
-// 					if (mask_device >> 2 & 0x01) {
-// 							let emc_mask = input.bytes[index++];
-
-// 							for (let i = 0; i < 4; i++) {
-// 									if (emc_mask >> i & 0x01) {
-// 											data.modules.push({
-// 													n: 'emc_e' + (i + 1),
-// 													v: (emc_mask >> i & 0x01) ? 'enable' : 'disable'
-// 											});
-// 									}
-// 							}
-
-// 							const em_cfg = ['min', 'max', 'avg'];
-// 							for (let i = 0; i < 3; i++) {
-// 									data.modules.push({
-// 											n: 'emc_' + em_cfg[i],
-// 											v: (emc_mask >> (i + 5) & 0x01) ? 'enable' : 'disable'
-// 									});
-// 							}
-
-// 							data.device.push({
-// 									n: 'emc_calibration',
-// 									v: input.bytes[index++] ? 'calibrated' : 'not_calibrated'
-// 							});
-// 					}
-// 			}
-// 	}
-
-// 	return { data };
-// }
-
-// Number.prototype.round = function (n) {
-// 	const d = Math.pow(10, n);
-// 	return Math.round((this + Number.EPSILON) * d) / d;
-// }
-
-// function read_uint16(bytes) {
-// 	let value = (bytes[0] << 8) + bytes[1];
-// 	return value & 0xffff;
-// }
-
-// function read_uint32(bytes) {
-// 	let value = (bytes[0] << 24) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3];
-// 	return value & 0xffffffff;
-// }
-
-//OLD
-//
-// 	// 	//   var decoded = {};
-// 	// 	//   var index = 0;
-// 	// 	//   var mask_sensor_int = bytes[index++];
-// 	// 	//   var mask_sensor_ext = bytes[index++];
-// 	// 	//   var status_dry = ["OPEN", "CLOSED"];
-// 	// 	//   var status_relay = ["NO", "NC"];
-// 	// 	//   var novo_firmware = 0;
-//
-// 	// 	//  if (bytes.length > index)
-// 	// 	//  {
-// 	// 	//       if (mask_sensor_int & 0x19)
-// 	// 	//       {
-// 	// 	//           decoded.internal_sensors = [];
-// 	// 	//       }
-
-// 	// 	//       if(mask_sensor_int & 0x80)
-// 	// 	//       {
-// 	// 	//           decoded.internal_sensors = [];
-// 	// 	//           novo_firmware = 1;
-// 	// 	//           mask_sensor_ext = bytes[index++]; // aumenta mais 1 index por ser novo firmware
-// 	// 	//       }
-
-// 	// 	//       // Decode Battery
-// 	// 	//       if (mask_sensor_int >> 0 & 0x01)
-// 	// 	//       {
-// 	// 	//           var battery = {};
-// 	// 	//           battery.n = 'battery';
-// 	// 	//           battery.v = (bytes[index++] / 10.0).toFixed(1);
-// 	// 	//           battery.u = 'V';
-// 	// 	//           decoded.internal_sensors.push(battery);
-// 	// 	//       }
-
-// 	// 	//       // Decode Firmware Version
-// 	// 	//       if (mask_sensor_int >> 2 & 0x01) {
-// 	// 	//           var firmware_version = {n : "version"};
-// 	// 	//           var firmware = bytes[index++] | (bytes[index++] << 8) | (bytes[index++] << 16);
-// 	// 	//           var hardware = (firmware / 1000000) >>> 0;
-// 	// 	//           var compatibility = ((firmware / 10000) - (hardware * 100)) >>> 0;
-// 	// 	//           var feature = ((firmware - (hardware * 1000000) - (compatibility * 10000)) / 100) >>> 0;
-// 	// 	//           var bug = (firmware - (hardware * 1000000) - (compatibility * 10000) - (feature * 100)) >>> 0;
-
-// 	// 	//           firmware_version.v = hardware + '.' + compatibility + '.' + feature + '.' + bug;
-// 	// 	//           decoded.device.push(firmware_version);
-// 	// 	//       }
-
-// 	// 	//       // Decode Temperature Int
-// 	// 	//       if (mask_sensor_int >> 3 & 0x01) { //3
-// 	// 	//           var temperature = {};
-// 	// 	//           temperature.v = bytes[index++] | (bytes[index++] << 8);
-// 	// 	//           temperature.v = ((temperature.v / 100.0) - 273.15).toFixed(2);
-// 	// 	//           temperature.n = "Int. temp.";
-// 	// 	//           temperature.u = "C";
-
-// 	// 	//           decoded.internal_sensors.push(temperature);
-// 	// 	//       }
-
-// 	// 	//       // Decode Moisture Int
-// 	// 	//       if (mask_sensor_int >> 4 & 0x01) {   //4
-// 	// 	//           var humidity = {};
-// 	// 	//           humidity.v = bytes[index++] | (bytes[index++] << 8);
-// 	// 	//           humidity.v = (humidity.v / 10.0).toFixed(2);
-// 	// 	//           humidity.n = "Int. hum.";
-// 	// 	//           humidity.u = "%";
-// 	// 	//           decoded.internal_sensors.push(humidity);
-// 	// 	//       }
-
-// 	// 	//       var dry = {};
-// 	// 	//       if (novo_firmware == 1)
-// 	// 	//       {// Decode Drys
-// 	// 	//           if (mask_sensor_ext & 0x0F) {
-// 	// 	//               decoded.drys = [];
-
-// 	// 	//               // Decode Dry 1 State
-// 	// 	//               if (mask_sensor_ext >> 0 & 0x01) {
-// 	// 	//                   dry = {};
-// 	// 	//                   dry.n = 'C1 State';
-// 	// 	//                   dry.v = status_dry[(mask_sensor_ext >> 0 & 0x01)];
-// 	// 	//                   decoded.drys.push(dry);
-// 	// 	//               }
-
-// 	// 	//               // // Decode Dry 1 Count
-// 	// 	//               // if (mask_sensor_ext >> 1 & 0x01) {
-// 	// 	//               //      dry = {};
-// 	// 	//               //     dry.n = 'C1 Count';
-// 	// 	//               //     dry.v = bytes[index++] | (bytes[index++] << 8);
-// 	// 	//               //     decoded.drys.push(dry);
-// 	// 	//               // }
-
-// 	// 	//               // Decode Dry 2 State
-// 	// 	//               if (mask_sensor_ext >> 2 & 0x01) {
-// 	// 	//                    dry = {};
-// 	// 	//                   dry.n = 'C2 State';
-// 	// 	//                   dry.v = status_dry[(mask_sensor_ext >> 2 & 0x01)];
-// 	// 	//                   decoded.drys.push(dry);
-// 	// 	//               }
-
-// 	// 	//               // // Decode Dry 2 Count
-// 	// 	//               // if (mask_sensor_ext >> 3 & 0x01) {
-// 	// 	//               //      dry = {};
-// 	// 	//               //     dry.n = 'C2 Count';
-// 	// 	//               //     dry.v = bytes[index++] | (bytes[index++] << 8);
-// 	// 	//               //     decoded.drys.push(dry);
-// 	// 	//               // }
-// 	// 	//           }
-// 	// 	//           index++; // acerta contagem
-// 	// 	//           index++;
-// 	// 	//       }
-// 	// 	//       else
-// 	// 	//       {// Decode Drys
-// 	// 	//           if (mask_sensor_ext & 0x0F) {
-// 	// 	//               decoded.drys = [];
-
-// 	// 	//               // Decode Dry 1 State
-// 	// 	//               if (mask_sensor_ext >> 0 & 0x01) {
-// 	// 	//                   dry = {};
-// 	// 	//                   dry.n = 'C1 State';
-// 	// 	//                   dry.v = status_dry[bytes[index++]];
-// 	// 	//                   decoded.drys.push(dry);
-// 	// 	//               }
-
-// 	// 	//               // Decode Dry 1 Count
-// 	// 	//               if (mask_sensor_ext >> 1 & 0x01) {
-// 	// 	//                    dry = {};
-// 	// 	//                   dry.n = 'C1 Count';
-// 	// 	//                   dry.v = bytes[index++] | (bytes[index++] << 8);
-// 	// 	//                   decoded.drys.push(dry);
-// 	// 	//               }
-
-// 	// 	//               // Decode Dry 2 State
-// 	// 	//               if (mask_sensor_ext >> 2 & 0x01) {
-// 	// 	//                    dry = {};
-// 	// 	//                   dry.n = 'C2 State';
-// 	// 	//                   dry.v = status_dry[bytes[index++]];
-// 	// 	//                   decoded.drys.push(dry);
-// 	// 	//               }
-
-// 	// 	//               // Decode Dry 2 Count
-// 	// 	//               if (mask_sensor_ext >> 3 & 0x01) {
-// 	// 	//                    dry = {};
-// 	// 	//                   dry.n = 'C2 Count';
-// 	// 	//                   dry.v = bytes[index++] | (bytes[index++] << 8);
-// 	// 	//                   decoded.drys.push(dry);
-// 	// 	//               }
-// 	// 	//           }
-
-// 	// 	//           // Decode DS18B20 Probe
-// 	// 	//           if (mask_sensor_ext >> 4 & 0x07) {
-// 	// 	//               var nb_probes = (mask_sensor_ext >> 4 & 0x07) >>> 0;
-
-// 	// 	//               decoded.probes = [];
-
-// 	// 	//               for (var i = 0; i < nb_probes; i++) {
-// 	// 	//                   var probe = {};
-
-// 	// 	//                   probe.n = 'temperature';
-// 	// 	//                   probe.v = (((bytes[index++] | (bytes[index++] << 8)) / 100.0) - 273).toFixed(2);
-// 	// 	//                   probe.u = 'C';
-
-// 	// 	//                   if (mask_sensor_ext >> 7 & 0x01) {
-// 	// 	//                       index += 7;
-// 	// 	//                       probe.rom = (bytes[index--]).toString(16);
-
-// 	// 	//                       for (var j = 0; j < 7; j++) {
-// 	// 	//                           probe.rom += (bytes[index--]).toString(16);
-// 	// 	//                       }
-// 	// 	//                       index += 9;
-// 	// 	//                   } else {
-// 	// 	//                       probe.rom = bytes[index++];
-// 	// 	//                   }
-// 	// 	//                   probe.rom = probe.rom.toUpperCase();
-// 	// 	//                   decoded.probes.push(probe);
-// 	// 	//               }
-// 	// 	//           }
-// 	// 	//       }
-
-// 	// 	//       // Decode Extension Module(s).
-// 	// 	//       if (bytes.length > index)
-// 	// 	//       {
-// 	// 	//           decoded.modules = [];
-
-// 	// 	//           while (bytes.length > index)
-// 	// 	//           {
-// 	// 	//               var module_type = {n : "module"};
-// 	// 	switch bytes[index] {
-// 	// 	//               switch (bytes[index])
-// 	// 	//               {
-// 	// 	case 1:
-// 	// 		//                       {
-// 	// 		//                           module_type.v = "EM S104";
-// 	// 		//                           index++;
-// 	// 		//                           var mask_ems104 = bytes[index++];
-
-// 	// 		//                           // E1
-// 	// 		//                           if (mask_ems104 >> 0 & 0x01) {
-// 	// 		//                               var conn = {};
-// 	// 		//                               conn.n = 'e1_temp';
-// 	// 		//                               conn.v = (bytes[index++] | (bytes[index++] << 8));
-// 	// 		//                               conn.v = ((conn.v / 100.0) - 273.15).toFixed(2);
-// 	// 		//                               conn.u = 'C';
-// 	// 		//                               decoded.modules.push(conn);
-// 	// 		//                           }
-
-// 	// 		//                           // E2
-// 	// 		//                           if (mask_ems104 >> 1 & 0x01) {
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'e2_kpa';
-// 	// 		//                               conn.v = ((bytes[index++] | (bytes[index++] << 8)) / 100.0).toFixed(2);
-// 	// 		//                               conn.u = 'kPa';
-// 	// 		//                               decoded.modules.push(conn);
-// 	// 		//                           }
-
-// 	// 		//                           // E3
-// 	// 		//                           if (mask_ems104 >> 2 & 0x01) {
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'e3_kpa';
-// 	// 		//                               conn.v = ((bytes[index++] | (bytes[index++] << 8)) / 100.0).toFixed(2);
-// 	// 		//                               conn.u = 'kPa';
-// 	// 		//                               decoded.modules.push(conn);
-// 	// 		//                           }
-
-// 	// 		//                           // E4
-// 	// 		//                           if (mask_ems104 >> 3 & 0x01) {
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'e4_kpa';
-// 	// 		//                               conn.v = ((bytes[index++] | (bytes[index++] << 8)) / 100.0).toFixed(2);
-// 	// 		//                               conn.u = 'kPa';
-// 	// 		//                               decoded.modules.push(conn);
-// 	// 		//                           }
-// 	// 		//                       }
-// 	// 		//                       break;
-
-// 	// 	case 2:
-// 	// 		//                       {
-// 	// 		//                           module_type.v = "EM C104";
-// 	// 		//                           index++;
-// 	// 		//                           var mask_emc104 = bytes[index++];
-
-// 	// 		//                           // Plus (Min Max and Avg)
-// 	// 		//                           if (mask_emc104 >> 4 & 0x01) {
-// 	// 		//                               for (var k = 0; k < 4; k++) {
-// 	// 		//                                   if ((mask_emc104 >> k) & 0x01) {
-// 	// 		//                                        conn = {};
-// 	// 		//                                       conn.n = 'e' + (k + 1) + '_curr';
-// 	// 		//                                       conn.u = "mA";
-// 	// 		//                                       // Min
-// 	// 		//                                       if (mask_emc104 >> 5 & 0x01) {
-// 	// 		//                                           conn.min = (bytes[index++] / 12.0).toFixed(2);
-// 	// 		//                                       }
-// 	// 		//                                       // Max
-// 	// 		//                                       if (mask_emc104 >> 6 & 0x01) {
-// 	// 		//                                           conn.max = (bytes[index++] / 12.0).toFixed(2);
-// 	// 		//                                       }
-// 	// 		//                                       // Avg
-// 	// 		//                                       if (mask_emc104 >> 7 & 0x01) {
-// 	// 		//                                           conn.avg = (bytes[index++] / 12.0).toFixed(2);
-// 	// 		//                                       }
-// 	// 		//                                       decoded.modules.push(conn);
-// 	// 		//                                   }
-// 	// 		//                               }
-// 	// 		//                           } else {
-// 	// 		//                               // E1
-// 	// 		//                               if (mask_emc104 >> 0 & 0x01) {
-// 	// 		//                                    conn = {};
-// 	// 		//                                   conn.n = 'e1_curr';
-// 	// 		//                                   conn.v = ((bytes[index++] | (bytes[index++] << 8)) / 1000).toFixed(2);
-// 	// 		//                                   conn.u = "mA";
-// 	// 		//                                   decoded.modules.push(conn);
-// 	// 		//                               }
-
-// 	// 		//                               // E2
-// 	// 		//                               if (mask_emc104 >> 1 & 0x01) {
-// 	// 		//                                    conn = {};
-// 	// 		//                                   conn.n = 'e2_curr';
-// 	// 		//                                   conn.v = ((bytes[index++] | (bytes[index++] << 8)) / 1000).toFixed(2);
-// 	// 		//                                   conn.u = "mA";
-// 	// 		//                                   decoded.modules.push(conn);
-// 	// 		//                               }
-
-// 	// 		//                               // E3
-// 	// 		//                               if (mask_emc104 >> 2 & 0x01) {
-// 	// 		//                                    conn = {};
-// 	// 		//                                   conn.n = 'e3_curr';
-// 	// 		//                                   conn.v = ((bytes[index++] | (bytes[index++] << 8)) / 1000).toFixed(2);
-// 	// 		//                                   conn.u = "mA";
-// 	// 		//                                   decoded.modules.push(conn);
-// 	// 		//                               }
-
-// 	// 		//                               // E4
-// 	// 		//                               if (mask_emc104 >> 3 & 0x01) {
-// 	// 		//                                    conn = {};
-// 	// 		//                                   conn.n = 'e4_curr';
-// 	// 		//                                   conn.v = ((bytes[index++] | (bytes[index++] << 8)) / 1000).toFixed(2);
-// 	// 		//                                   conn.u = "mA";
-// 	// 		//                                   decoded.modules.push(conn);
-// 	// 		//                               }
-// 	// 		//                           }
-
-// 	// 		//                       }
-// 	// 		//                       break;
-
-// 	// 		//                   // EM W104
-// 	// 	case 4:
-// 	// 		//                       {
-// 	// 		//                           module_type.v = "EM W104";
-// 	// 		//                           index++;
-// 	// 		//                           var mask_emw104 = bytes[index++];
-
-// 	// 		//                           //Weather Station
-// 	// 		//                           if (mask_emw104 >> 0 & 0x01) {
-// 	// 		//                               //Rain
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'rain_lvl';
-// 	// 		//                               conn.v = (((bytes[index++] << 8) | bytes[index++]) / 10.0).toFixed(1);
-// 	// 		//                               conn.u = 'mm';
-// 	// 		//                               decoded.modules.push(conn);
-
-// 	// 		//                               //Average Wind Speed
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'avg_wind_speed'
-// 	// 		//                               conn.v = bytes[index++].toFixed(0);
-// 	// 		//                               conn.u = 'km/h';
-// 	// 		//                               decoded.modules.push(conn);
-
-// 	// 		//                               //Gust Wind Speed
-// 	// 		//                               conn = {};
-// 	// 		//                               conn.n = 'gust_wind_speed';
-// 	// 		//                               conn.v = bytes[index++].toFixed(0);
-// 	// 		//                               conn.u = 'km/h';
-// 	// 		//                               decoded.modules.push(conn);
-
-// 	// 		//                               //Wind Direction
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'wind_direction';
-// 	// 		//                               conn.v = ((bytes[index++] << 8) | bytes[index++]).toFixed(0);
-// 	// 		//                               conn.u = 'graus';
-// 	// 		//                               decoded.modules.push(conn);
-
-// 	// 		//                               //Temperature
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'temperature';
-// 	// 		//                               conn.v = ((bytes[index++] << 8) | bytes[index++]) / 10.0;
-// 	// 		//                               conn.v = (conn.v - 273.15).toFixed(1);
-// 	// 		//                               conn.u = 'C';
-// 	// 		//                               decoded.modules.push(conn);
-
-// 	// 		//                               //Humidity
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'humidity';
-// 	// 		//                               conn.v = bytes[index++].toFixed(0);
-// 	// 		//                               conn.u = '%';
-// 	// 		//                               decoded.modules.push(conn);
-
-// 	// 		//                               //Lux and UV
-// 	// 		//                               if (mask_emw104 >> 1 & 0x01) {
-// 	// 		//                                    conn = {};
-// 	// 		//                                   conn.n = 'luminosity';
-// 	// 		//                                   conn.v = (bytes[index++] << 16) | (bytes[index++] << 8) | bytes[index++];
-// 	// 		//                                   conn.u = 'lx';
-// 	// 		//                                   decoded.modules.push(conn);
-
-// 	// 		//                                    conn = {};
-// 	// 		//                                   conn.n = 'uv';
-// 	// 		//                                   conn.v = bytes[index++];
-// 	// 		//                                   conn.v = (conn.v / 10.0).toFixed(1);
-// 	// 		//                                   conn.u = '/';
-// 	// 		//                                   decoded.modules.push(conn);
-// 	// 		//                               }
-// 	// 		//                           }
-
-// 	// 		//                           //Pyranometer
-// 	// 		//                           if (mask_emw104 >> 2 & 0x01) {
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'solar_radiation';
-// 	// 		//                               conn.v = (bytes[index++] << 8) | bytes[index++];
-// 	// 		//                               conn.v = (conn.v / 10.0).toFixed(1);
-// 	// 		//                               conn.u = 'W/m²';
-// 	// 		//                               decoded.modules.push(conn);
-// 	// 		//                           }
-
-// 	// 		//                           //Barometer
-// 	// 		//                           if (mask_emw104 >> 3 & 0x01) {
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'atm_pres';
-// 	// 		//                               conn.v = (bytes[index++] << 16);
-// 	// 		//                               conn.v |= (bytes[index++] << 8) | bytes[index++] << 0;
-// 	// 		//                               conn.v = (conn.v / 100.0).toFixed(1);
-// 	// 		//                               conn.u = 'hPa²';
-// 	// 		//                               decoded.modules.push(conn);
-// 	// 		//                           }
-// 	// 		//                       }
-// 	// 		//                       break;
-
-// 	// 		//                   // EM R102
-// 	// 	case 5:
-// 	// 		//                       {
-// 	// 		//                           index++;
-// 	// 		//                           module_type.v = "EM R102";
-
-// 	// 		//                           var mask_emr102 = bytes[index++];
-// 	// 		//                           var mask_data = bytes[index++];
-
-// 	// 		//                           // E1
-// 	// 		//                           if (mask_emr102 >> 0 & 0x01) {
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'C3 Status';
-// 	// 		//                               conn.v = status_dry[(mask_data >> 0 & 0x01)];
-// 	// 		//                               conn.u = "bool";
-// 	// 		//                               decoded.modules.push(conn);
-
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'C3 Count';
-// 	// 		//                               conn.v = bytes[index++] | (bytes[index++] << 8);
-// 	// 		//                               decoded.modules.push(conn);
-// 	// 		//                           }
-
-// 	// 		//                           // E2
-// 	// 		//                           if (mask_emr102 >> 1 & 0x01) {
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'C4 Status';
-// 	// 		//                               conn.v = status_dry[(mask_data >> 1 & 0x01)];
-// 	// 		//                               conn.u = "bool";
-// 	// 		//                               decoded.modules.push(conn);
-
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'C4 Count';
-// 	// 		//                               conn.v = bytes[index++] | (bytes[index++] << 8);
-// 	// 		//                               decoded.modules.push(conn);
-// 	// 		//                           }
-
-// 	// 		//                           // E3
-// 	// 		//                           if (mask_emr102 >> 2 & 0x01) {
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'B3 Relay';
-// 	// 		//                               conn.v = status_relay[(mask_data >> 2 & 0x01)];
-// 	// 		//                               decoded.modules.push(conn);
-// 	// 		//                           }
-
-// 	// 		//                           // E4
-// 	// 		//                           if (mask_emr102 >> 3 & 0x01) {
-// 	// 		//                                conn = {};
-// 	// 		//                               conn.n = 'B4 Relay';
-// 	// 		//                               conn.v = status_relay[(mask_data >> 3 & 0x01)];
-// 	// 		//                               decoded.modules.push(conn);
-// 	// 		//                           }
-
-// 	// 		//                       }
-// 	// 		//                       break;
-
-// 	// 		//                   // EM ACW100 & EM THW 100/200/201
-// 	// 	case 6:
-// 	// 		//                       {
-// 	// 		//                           index++;
-
-// 	// 		//                           var rom = {};
-// 	// 		//                           var one_wire_ext_model = 0x00;
-// 	// 		//                           var mask_em_acw_thw = bytes[index++];
-
-// 	// 		//                           if (mask_em_acw_thw == 0x03) {
-// 	// 		//                               one_wire_ext_model = 0x06;
-// 	// 		//                           }
-// 	// 		//                           else {
-// 	// 		//                               if (mask_em_acw_thw >> 0 & 0x01) {
-// 	// 		//                                   one_wire_ext_model |= 0x01;
-// 	// 		//                               }
-
-// 	// 		//                               if (mask_em_acw_thw >> 4 & 0x01) {
-// 	// 		//                                   one_wire_ext_model |= 0x02;
-// 	// 		//                               }
-// 	// 		//                           }
-
-// 	// 		//                           switch (one_wire_ext_model) {
-// 	// 		//                               case 0x01:
-// 	// 		//                                   module_type.v = "EM THW 200";
-// 	// 		//                                   break;
-// 	// 		//                               case 0x02:
-// 	// 		//                                   module_type.v = "EM ACW 100";
-// 	// 		//                                   break;
-// 	// 		//                               case 0x03:
-// 	// 		//                                   module_type.v = "EM THW 201";
-// 	// 		//                                   break;
-// 	// 		//                               case 0x06:
-// 	// 		//                                   module_type.v = "EM THW 100";
-// 	// 		//                                   break;
-// 	// 		//                               default:
-// 	// 		//                                   module_type.v = "Unknow";
-// 	// 		//                                   break;
-// 	// 		//                           }
-// 	// 		//                           decoded.modules.push(module_type);
-// 	// 		//                           //ROM
-// 	// 		//                           if ((mask_sensor_ext >> 4 & 0x07) && (mask_sensor_ext >> 7 & 0x00)) {
-// 	// 		//                               rom.v = bytes[index++];
-// 	// 		//                           } else {
-// 	// 		//                               index += 7;
-// 	// 		//                               rom.v = (bytes[index--]).toString(16);
-
-// 	// 		//                               for ( j = 0; j < 7; j++) {
-// 	// 		//                                   rom.v += (bytes[index--]).toString(16);
-// 	// 		//                               }
-// 	// 		//                               index += 9;
-// 	// 		//                           }
-
-// 	// 		//                           rom.v = rom.v.toUpperCase();
-// 	// 		//                           rom.n = 'ROM';
-// 	// 		//                           decoded.modules.push(rom);
-
-// 	// 		//                           //Temperature
-// 	// 		//                           if (mask_em_acw_thw >> 0 & 0x01) {
-// 	// 		//                               var sensor = {};
-// 	// 		//                               sensor.n = 'temperature';
-// 	// 		//                               sensor.u = 'C';
-// 	// 		//                               sensor.v = ((bytes[index++] | (bytes[index++] << 8)) / 100.0) - 273.15;
-// 	// 		//                               sensor.v = sensor.v.toFixed(2);
-// 	// 		//                               decoded.modules.push(sensor);
-// 	// 		//                           }
-
-// 	// 		//                           //Humidity
-// 	// 		//                           if (mask_em_acw_thw >> 1 & 0x01) {
-// 	// 		//                                sensor = {};
-// 	// 		//                               sensor.n = 'humidity';
-// 	// 		//                               sensor.u = '%';
-// 	// 		//                               sensor.v = (bytes[index++] | (bytes[index++] << 8)) / 100.0;
-// 	// 		//                               sensor.v = sensor.v.toFixed(2);
-// 	// 		//                               decoded.modules.push(sensor);
-// 	// 		//                           }
-
-// 	// 		//                           //Lux
-// 	// 		//                           if (mask_em_acw_thw >> 2 & 0x01) {
-// 	// 		//                                sensor = {};
-// 	// 		//                               sensor.n = 'luminosity';
-// 	// 		//                               sensor.u = 'lux';
-// 	// 		//                               sensor.v = bytes[index++] | (bytes[index++] << 8);
-// 	// 		//                               sensor.v = sensor.v.toFixed(2);
-// 	// 		//                               decoded.modules.push(sensor);
-// 	// 		//                           }
-
-// 	// 		//                           //Noise
-// 	// 		//                           if (mask_em_acw_thw >> 3 & 0x01) {
-// 	// 		//                                sensor = {};
-// 	// 		//                               sensor.n = 'noise';
-// 	// 		//                               sensor.u = 'dB';
-// 	// 		//                               sensor.v = (bytes[index++] | (bytes[index++] << 8)) / 100.0;
-// 	// 		//                               sensor.v = sensor.v.toFixed(2);
-// 	// 		//                               decoded.modules.push(sensor);
-// 	// 		//                           }
-
-// 	// 		//                           //Temperature RTDT
-// 	// 		//                           if (mask_em_acw_thw >> 4 & 0x01) {
-// 	// 		//                                sensor = {};
-// 	// 		//                               sensor.n = 'temperature_rtdt';
-// 	// 		//                               sensor.u = 'C';
-// 	// 		//                               sensor.v = bytes[index++];
-// 	// 		//                               for ( j = 1; j < 4; j++) {
-// 	// 		//                                   sensor.v |= (bytes[index++] << (8 * j));
-// 	// 		//                               }
-// 	// 		//                               sensor.v = ((sensor.v / 100.0) - 273.15).toFixed(2);
-// 	// 		//                               decoded.modules.push(sensor);
-// 	// 		//                           }
-// 	// 		//                       }
-// 	// 		//                       break;
-
-// 	// 	default:
-// 	// 	}
-// 	// 	//           }
-// 	// 	//       }
-// 	// 	//   }
-// 	return "port4 return"
-// }
+func roundFloat(val float64, precision uint) float64 {
+	ratio := math.Pow(10, float64(precision))
+	return math.Round(val*ratio) / ratio
+}
+
+func protocolParserPort4(bytes []byte) string {
+	var port4 Port4
+
+	var maskSensorInt byte
+	var maskSensorIntE byte
+	var maskSensorExt byte
+
+	index := 0
+
+	// deviceModel := "NIT 21LI"
+
+	// Verify the presence os maskSensorInt in byte[0]
+	maskSensorInt = bytes[index]
+	// fmt.Printf("\nprotocolParserPort4 => maskSensorInt %b", maskSensorInt)
+	index = index + 1
+	// If Extended Internal Sensor Mask
+	if maskSensorInt>>7&0x01 == 0x01 {
+		maskSensorIntE = bytes[index]
+		// fmt.Printf("\nprotocolParserPort4 => maskSensorIntE %b", maskSensorIntE)
+		index = index + 1
+	}
+
+	// External Sensor Mask
+	// byte [3] if Extended Internal Sensor Mask or byte [2] if does not
+	maskSensorExt = bytes[index]
+	// fmt.Printf("\nprotocolParserPort4 => maskSensorExt %b", maskSensorExt)
+	index = index + 1
+
+	// Verify Internal Humidity and Temperature fails
+	if maskSensorIntE>>0&0x01 == 0x01 {
+		// if 0x01&0x01 == 0x01 {
+		port4.EnvSensorStatus = "fail"
+		// fmt.Printf("\nprotocolParserPort4 => EnvSensorStatus %s", port4.EnvSensorStatus)
+	} else {
+		port4.EnvSensorStatus = "ok"
+
+	}
+
+	// TODO: VERIFY CODE
+	// Decode Battery
+	// If bit 0 of maskSensorInt exists
+	if maskSensorInt>>0&0x01 == 0x01 {
+		port4.IsBattery = true
+		if maskSensorInt>>6&0x01 == 0x01 {
+			v := bytes[index]
+			f := roundFloat(float64((v/120.0)+1), 2)
+
+			port4.InternalBatteryVoltage = f
+		} else {
+			v := bytes[index]
+			f := roundFloat(float64(v/10.0), 1)
+			port4.InternalBatteryVoltage = f
+		}
+		index = index + 1
+	} else {
+		port4.IsBattery = false
+	}
+	// fmt.Printf("\nprotocolParserPort4 => IsBattery %d", port4.IsBattery)
+
+	// TODO: VERIFY CODE WITH 0xFE
+	// Decode Firmware Version
+	// Verify if firmware version appear on message
+	if maskSensorInt>>2&0x01 == 0x01 {
+		port4.IsFirmware = true
+		v := uint64(bytes[index])
+		v |= uint64(bytes[index+2]) << 8
+		v |= uint64(bytes[index+3]) << 16
+		v = v / 1000000
+		// fmt.Printf("\nprotocolParserPort4 => Firmware Version %d", v)
+
+		// hardware = (v / 1000000) >>> 0;
+		// let compatibility = ((firmware.v / 10000) - (hardware * 100)) >>> 0;
+		// let feature = ((firmware.v - (hardware * 1000000) - (compatibility * 10000)) / 100) >>> 0;
+		// let bug = (firmware.v - (hardware * 1000000) - (compatibility * 10000) - (feature * 100)) >>> 0;
+		// firmware.v = hardware + '.' + compatibility + '.' + feature + '.' + bug;
+		// data.device.push(firmware);
+		index = index + 3
+	} else {
+		port4.IsFirmware = false
+	}
+	// fmt.Printf("\nprotocolParserPort4 => IsFirmware %d", port4.IsFirmware)
+
+	// Decode External Power or Battery
+	if maskSensorInt>>5&0x01 == 0x01 {
+		s := "external"
+		port4.Power = s
+	} else {
+		s := "battery"
+		port4.Power = s
+	}
+	// fmt.Printf("\nprotocolParserPort4 => Power Source %d", port4.Power)
+
+	// Decode Temperature Int
+	if maskSensorInt>>3&0x01 == 0x01 {
+		v := uint64(bytes[index])
+		v |= uint64(bytes[index+1]) << 8
+		f := roundFloat((float64(v)/100)-273.15, 2)
+		port4.InternalTemperature = f
+		index = index + 2
+		// fmt.Printf("\nprotocolParserPort4 => Internal Temperature f %d", f)
+	}
+
+	// Decode Moisture Int
+	if maskSensorInt>>4&0x01 == 0x01 {
+		// .round(2)
+		v := uint64(bytes[index])
+		v |= uint64(bytes[index+1]) << 8
+		f := roundFloat((float64(v) / 10), 2)
+		port4.InternalHumidity = f
+		index = index + 2
+		// fmt.Printf("\nprotocolParserPort4 => Internal Humidity f %d", f)
+	}
+
+	// Decode Drys
+	// Decode Dry 1 State
+	if maskSensorExt>>0&0x01 == 0x01 {
+		if bytes[index] == 0x01 {
+			s := "closed"
+			port4.C1State = s
+		} else {
+			s := "open"
+			port4.C1State = s
+		}
+		index = index + 1
+		// fmt.Printf("\nprotocolParserPort4 => C1State %d", port4.C1State)
+	}
+
+	// Decode Dry 1 Count
+	if maskSensorExt>>1&0x01 == 0x01 {
+		v := uint64(bytes[index])
+		v |= uint64(bytes[index+1]) << 8
+		port4.C1Count = v
+		index = index + 2
+		// fmt.Printf("\nprotocolParserPort4 => C1Count %d", port4.C1Count)
+	}
+
+	// Decode Dry 2 State
+	if maskSensorExt>>2&0x01 == 0x01 {
+		if bytes[index] == 0x01 {
+			s := "closed"
+			port4.C2State = s
+		} else {
+			s := "open"
+			port4.C2State = s
+		}
+		index = index + 1
+		// fmt.Printf("\nprotocolParserPort4 => C2State %d", port4.C2State)
+	}
+
+	// Decode Dry 2 Count
+	if maskSensorExt>>3&0x01 == 0x01 {
+		v := uint64(bytes[index])
+		v |= uint64(bytes[index+1]) << 8
+		port4.C2Count = v
+		index = index + 2
+		// fmt.Printf("\nprotocolParserPort4 => C2Count %d", port4.C2Count)
+	}
+
+	// // Decode DS18B20 Probe
+	// if (mask_sensor_ext >> 4 & 0x07 == 0x07) {
+	// 		let nb_probes = (mask_sensor_ext >> 4 & 0x07) >>> 0;
+	// 		for (let i = 0; i < nb_probes; i++) {
+	// 				let probe = { u: 'C' };
+	// 				let rom = {};
+	//
+	// 				probe.v = (((input.bytes[index++] | (input.bytes[index++] << 8)) / 100.0) - 273.15).round(2);
+	// 				if (mask_sensor_ext >> 7 & 0x01) {
+	// 						index += 7;
+	// 						rom = (input.bytes[index--]).toString(16);
+	// 						for (let j = 0; j < 7; j++) {
+	// 								rom += (input.bytes[index--]).toString(16);
+	// 						}
+	// 						index += 9;
+	// 				} else {
+	// 						rom = input.bytes[index++];
+	// 				}
+	// 				probe.n = 'temperature' + '_' + rom;
+	// 				data.probes.push(probe);
+	// 		}
+	// }
+
+	// Decode Extension Module(s) ONLY EMW104 validated
+	if bytes[index] == 0x04 {
+
+		switch bytes[index] {
+		// 		case 1:
+		// 			i = i + 1
+		// 			maskEms104 := bytes[index+i]
+		// 			i = i + 1
+
+		// 			// E1
+		// 			if maskEms104>>0&0x01 == 0x01 {
+		// 				v := uint64(bytes[index])
+		// 				v |= uint64(bytes[index+1] << 8)
+		// 				f := float64(v / 100.0)
+		// 				// .round(2)
+		// 				port4.EmsE1Temp = f - 273.15
+		// 			}
+
+		// 			// KPA
+		// 			// if (maskEms104 >> (k + 1) & 0x01) {
+		// 			switch _kpa {
+		// 			case 0:
+		// 				v := uint64(bytes[i+3])
+		// 				v |= uint64(bytes[i+4]) << 8
+		// 				f := float64(v)
+		// 				port100.Kpa_0 = f
+		// 				i = i + 2
+		// 				_kpa = _kpa + 1
+		// 			case 1:
+		// 				v := uint64(bytes[i+3])
+		// 				v |= uint64(bytes[i+4]) << 8
+		// 				f := float64(v)
+		// 				port100.Kpa_1 = f
+		// 				i = i + 2
+		// 				_kpa = _kpa + 1
+		// 			case 2:
+		// 				v := uint64(bytes[i+3])
+		// 				v |= uint64(bytes[i+4]) << 8
+		// 				f := float64(v)
+		// 				port100.Kpa_2 = f
+		// 				i = i + 2
+		// 				_kpa = _kpa + 1
+		// 			}
+		// 		case 2:
+
+		// EM W104
+		case 4:
+			index = index + 1
+			maskEmw104 := bytes[index] //0f
+			index = index + 1
+			// fmt.Printf("\nprotocolParserPort4 => maskEmw104 %d", maskEmw104)
+
+			//Weather Station
+			if maskEmw104>>0&0x01 == 0x01 {
+				//Rain
+				v := uint64(bytes[index]) << 8
+				v |= uint64(bytes[index+1])
+				f := roundFloat((float64(v) / 10), 1)
+				port4.EmwRainLevel = f
+				index = index + 2
+				// fmt.Printf("\nprotocolParserPort4 => EmwRainLevel %d", port4.EmwRainLevel)
+
+				//Average Wind Speed
+				v = uint64(bytes[index])
+				port4.EmwAvgWindSpeed = v
+				// fmt.Printf("\nprotocolParserPort4 => EmwAvgWindSpeed %d", port4.EmwAvgWindSpeed)
+				index = index + 1
+
+				//Gust Wind Speed
+				v = uint64(bytes[index])
+				port4.EmwGustWindSpeed = v
+				// fmt.Printf("\nprotocolParserPort4 => EmwGustWindSpeed %d", port4.EmwGustWindSpeed)
+				index = index + 1
+
+				//Wind Direction
+				v = uint64(bytes[index]) << 8
+				v |= uint64(bytes[index+1])
+				port4.EmwWindDirection = v
+				// fmt.Printf("\nprotocolParserPort4 => EmwWindDirection %d", port4.EmwWindDirection)
+				index = index + 2
+
+				//Temperature
+				v = uint64(bytes[index]) << 8
+				v |= uint64(bytes[index+1])
+				f = roundFloat((float64(v)/10)-273.15, 2)
+				port4.EmwTemperature = f
+				// fmt.Printf("\nprotocolParserPort4 => EmwTemperature %d", port4.EmwTemperature)
+				index = index + 2
+
+				//Humidity
+				v = uint64(bytes[index])
+				port4.EmwHumidity = v
+				// fmt.Printf("\nprotocolParserPort4 => EmwHumidity %d", port4.EmwHumidity)
+				index = index + 1
+			}
+			//Lux and UV
+			if maskEmw104>>1&0x01 == 0x01 {
+				v := uint64(bytes[index]) << 16
+				v |= uint64(bytes[index+1]) << 8
+				v |= uint64(bytes[index+2])
+				port4.EmwLuminosity = v
+				// fmt.Printf("\nprotocolParserPort4 => EmwLuminosity %d", port4.EmwLuminosity)
+
+				v = uint64(bytes[index+3])
+				f := roundFloat((float64(v) / 10), 1)
+				port4.EmwUv = f
+				// fmt.Printf("\nprotocolParserPort4 => EmwUv %d", port4.EmwUv)
+				index = index + 4
+			}
+
+			//Pyranometer
+			if maskEmw104>>2&0x01 == 0x01 {
+				v := uint64(bytes[index]) << 8
+				v |= uint64(bytes[index+1])
+				f := roundFloat((float64(v) / 10), 1)
+				port4.EmwSolarRadiation = f
+				// fmt.Printf("\nprotocolParserPort4 => EmwSolarRadiation %d", port4.EmwSolarRadiation)
+				index = index + 2
+			}
+
+			//Barometer
+			if maskEmw104>>3&0x01 == 0x01 {
+				v := uint64(bytes[index]) << 16
+				v |= uint64(bytes[index+1]) << 8
+				v |= uint64(bytes[index+2])
+				f := roundFloat((float64(v) / 100), 2)
+				port4.EmwAtmPres = f
+				// fmt.Printf("\nprotocolParserPort4 => EmwAtmPres %d", port4.EmwAtmPres)
+				index = index + 3
+			}
+
+		// 			// EM R102
+		// 			// case 5:
+
+		// 			// EM ACW100 & EM THW 100/200/201
+		// 			// case 6:
+
+		default:
+			// fmt.Print("Data not parsed by decode.LoRaImt imtIotProtocolParser()\n")
+			fmt.Print("Data not parsed default PORT4\n")
+			// break PL
+
+			// }
+		}
+	}
+	p, err := json.Marshal(port4)
+	if err != nil {
+		fmt.Println(err)
+		return "Port4 data parsed wrongly"
+	}
+	return string(p[:])
+}
 
 func protocolParserPort100(bytes []byte) string {
 	var port100 Port100
@@ -1833,25 +986,63 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 		}
 
 	case 4:
-		// var port4 Port4
-		// d := protocolParserPort4(b)
-		// json.Unmarshal([]byte(d), &port4)
+		var port4 Port4
+		d := protocolParserPort4(b)
+		json.Unmarshal([]byte(d), &port4)
 
 		switch measurement {
 		case "WeatherStation":
-			// TODO: Decode Weather Station Port4
-			// var weatherStation WeatherStation
-			// weatherStation.InternalTemperature =
-			// weatherStation.InternalHumidity =
-			// weatherStation.RainLevel =
-			// weatherStation.AvgWindSpeed =
-			// weatherStation.GustWindSpeed =
-			// weatherStation.WindDirection =
-			// weatherStation.Temperature =
-			// weatherStation.Humidity =
-			// weatherStation.Luminosity =
-			// weatherStation.Uv =
-			// weatherStation.SolaRadiation =
+			var weatherStation WeatherStation
+			weatherStation.InternalTemperature = port4.InternalTemperature
+			weatherStation.InternalHumidity = port4.InternalHumidity
+			weatherStation.C1State = port4.C1State
+			weatherStation.C1Count = port4.C1Count
+			weatherStation.C2State = port4.C2State
+			weatherStation.C2Count = port4.C2Count
+			weatherStation.EwmRainLevel = port4.EmwRainLevel
+			weatherStation.EwmAvgWindSpeed = port4.EmwAvgWindSpeed
+			weatherStation.EwmGustWindSpeed = port4.EmwGustWindSpeed
+			weatherStation.EwmWindDirection = port4.EmwWindDirection
+			weatherStation.EwmTemperature = port4.EmwTemperature
+			weatherStation.EwmHumidity = port4.EmwHumidity
+			weatherStation.EwmLuminosity = port4.EmwLuminosity
+			weatherStation.EwmUv = port4.EmwUv
+			weatherStation.EwmSolarRadiation = port4.EmwSolarRadiation
+			weatherStation.EmwAtmPres = port4.EmwAtmPres
+
+			sb.WriteString(`,internalTemperature=`)
+			sb.WriteString(strconv.FormatFloat(weatherStation.InternalTemperature, 'f', -1, 64))
+			sb.WriteString(`,internalHumidity=`)
+			sb.WriteString(strconv.FormatFloat(weatherStation.InternalHumidity, 'f', -1, 64))
+			sb.WriteString(`,c1State=`)
+			sb.WriteString(weatherStation.C1State)
+			sb.WriteString(`,c1Count=`)
+			sb.WriteString(strconv.FormatUint(uint64(weatherStation.C1Count), 10))
+			sb.WriteString(`,c2State=`)
+			sb.WriteString(weatherStation.C2State)
+			sb.WriteString(`,c2Count=`)
+			sb.WriteString(strconv.FormatUint(uint64(weatherStation.C2Count), 10))
+			sb.WriteString(`,ewmRainLevel=`)
+			sb.WriteString(strconv.FormatFloat(weatherStation.EwmRainLevel, 'f', -1, 64))
+			sb.WriteString(`,ewmAvgWindSpeed=`)
+			sb.WriteString(strconv.FormatUint(uint64(weatherStation.EwmAvgWindSpeed), 10))
+			sb.WriteString(`,EwmGustWindSpeed=`)
+			sb.WriteString(strconv.FormatUint(uint64(weatherStation.EwmGustWindSpeed), 10))
+			sb.WriteString(`,ewmWindDirection=`)
+			sb.WriteString(strconv.FormatUint(uint64(weatherStation.EwmWindDirection), 10))
+			sb.WriteString(`,ewmTemperature=`)
+			sb.WriteString(strconv.FormatFloat(weatherStation.EwmTemperature, 'f', -1, 64))
+			sb.WriteString(`,ewmHumidity=`)
+			sb.WriteString(strconv.FormatUint(uint64(weatherStation.EwmHumidity), 10))
+			sb.WriteString(`,ewmLuminosity=`)
+			sb.WriteString(strconv.FormatUint(uint64(weatherStation.EwmLuminosity), 10))
+			sb.WriteString(`,ewmUv=`)
+			sb.WriteString(strconv.FormatFloat(weatherStation.EwmUv, 'f', -1, 64))
+			sb.WriteString(`,ewmSolarRadiation=`)
+			sb.WriteString(strconv.FormatFloat(weatherStation.EwmSolarRadiation, 'f', -1, 64))
+			sb.WriteString(`,emwAtmPres=`)
+			sb.WriteString(strconv.FormatFloat(weatherStation.EmwAtmPres, 'f', -1, 64))
+
 		default:
 		}
 	}
@@ -1863,8 +1054,12 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 	var lns Lns
 	var lnsImt LnsImt
 	var lnsChirpStackV4 LnsChirpStackV4
-	// var influx Influx
-	// var lnsAtc LnsAtc
+
+	// fmt.Printf("\nmeasurement %s", measurement)
+	// fmt.Printf("\ndeviceId %s", deviceId)
+	// fmt.Printf("\ndirection %s", direction)
+	// fmt.Printf("\netc %s", etc)
+	// fmt.Printf("\nmessage %s", message)
 
 	if message == "" {
 		// return message, errors.New("empty message to parse")
@@ -1897,8 +1092,10 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 
 	case "chirpstackv4":
 		json.Unmarshal([]byte(message), &lnsChirpStackV4)
+		// fmt.Printf("\nmessage from chirpstackv4 parseLns %s", message)
 
 		lns.Measurement = measurement
+
 		lns.DeviceId = lnsChirpStackV4.DeviceInfo.DevEui
 		lns.RxInfoMac_0 = lnsChirpStackV4.RxInfo[0].GatewayId
 		lns.RxInfoTime_0 = lnsChirpStackV4.RxInfo[0].NsTime.UnixNano()
@@ -1913,9 +1110,11 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		lns.TxInfoSpreadFactor = lnsChirpStackV4.TxInfo.Modulation.Lora.SpreadingFactor
 		lns.TxInfoCodeRate = lnsChirpStackV4.TxInfo.Modulation.Lora.CodeRate
 		lns.FCnt = lnsChirpStackV4.FCnt
+
 		lns.FPort = lnsChirpStackV4.FPort
 		lns.FType = "uplink"
 		lns.Data = lnsChirpStackV4.Data
+		// fmt.Printf("\nlns.Data %s", lns.Data)
 
 	case "atc":
 		// lns.Measurement = measurement
@@ -1996,16 +1195,15 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(` `)
 		sb.WriteString(strconv.FormatInt(int64(lns.RxInfoTime_0), 10))
 	}
-	fmt.Printf("\n\nChirpstack %s\n\n", sb.String())
+	// fmt.Printf("\n\nChirpstack %s\n\n", sb.String())
 	return sb.String()
 }
 
 // func parseEvse(deviceId string, direction string, etc string, message string) string {
 // 	var s string
 
-// 	return s
-// }
-
+//		return s
+//	}
 func connLostHandler(c MQTT.Client, err error) {
 	fmt.Printf("Connection lost, reason: %v\n", err)
 	os.Exit(1)
@@ -2026,11 +1224,13 @@ func main() {
 
 	// MqttSubscriberTopic
 	var sbMqttSubTopic strings.Builder
+	// sbMqttSubTopic.WriteString("debug/OpenDataTelemetry/")
 	sbMqttSubTopic.WriteString("OpenDataTelemetry/")
 	sbMqttSubTopic.WriteString(ORGANIZATION)
 	sbMqttSubTopic.WriteString("/")
 	sbMqttSubTopic.WriteString(DEVICE_TYPE)
 	sbMqttSubTopic.WriteString("/+/+/+/+")
+	// sbMqttSubTopic.WriteString("/+/+/+")
 
 	// KafkaProducerClient
 	var sbKafkaProdClientId strings.Builder
@@ -2084,7 +1284,6 @@ func main() {
 	defer kafkaProdClient.Close()
 
 	// Delivery report handler for produced messages
-	// Delivery report handler for produced messages
 	go func() {
 		for e := range kafkaProdClient.Events() {
 			switch ev := e.(type) {
@@ -2092,7 +1291,7 @@ func main() {
 				if ev.TopicPartition.Error != nil {
 					fmt.Printf("Delivery failed: %v\n", ev.TopicPartition)
 				} else {
-					fmt.Printf("Delivered message to %v\n", ev.TopicPartition)
+					fmt.Printf("\nDelivered message to %v\n", ev.TopicPartition)
 				}
 			}
 		}
@@ -2110,6 +1309,12 @@ func main() {
 		deviceId := s[4]
 		direction := s[5]
 		etc := s[6]
+
+		// // DEBUG
+		// measurement := s[4]
+		// deviceId := s[5]
+		// direction := s[6]
+		// etc := s[7]
 
 		var kafkaMessage string
 
@@ -2131,7 +1336,7 @@ func main() {
 			case "LNS":
 				// var influx Influx
 				kafkaMessage = parseLns(measurement, deviceId, direction, etc, incoming[1])
-				// TODO: parseLns return a influx struct
+				fmt.Printf("\nMessage: %s", kafkaMessage)
 
 			case "EVSE":
 				// kafkaMessage = parseEvse(deviceId, direction, etc, incoming[1])
@@ -2145,14 +1350,8 @@ func main() {
 		// fmt.Printf("InfluxLineProtocol: %s\n", kafkaMessage)
 
 		// SET KAFKA
-
 		kafkaProdTopic := sbKafkaProdTopic.String()
 		// pClient.Publish(sbPubTopic.String(), byte(pQos), false, incoming[1])
-
-		// kafkaProdClient.Produce(&kafka.Message{
-		// 	TopicPartition: kafka.TopicPartition{Topic: &kafkaProdTopic, Partition: kafka.PartitionAny},
-		// 	Value:          []byte(kafkaMessage),
-		// }, nil)
 
 		kafkaProdClient.Produce(&kafka.Message{
 			TopicPartition: kafka.TopicPartition{Topic: &kafkaProdTopic, Partition: kafka.PartitionAny},
