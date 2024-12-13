@@ -75,7 +75,7 @@ type Port4 struct {
 	InternalBatteryVoltage float64
 	PowerSource            bool
 	FirmwareVersion        uint64
-	EnvSensorStatus        bool
+	EnvSensorFailStatus    bool
 	C1State                bool
 	C1Count                uint64
 	C2State                bool
@@ -93,7 +93,7 @@ type Port4 struct {
 	EmwSolarRadiation      float64
 	EmwAtmPres             float64
 
-	IsEnvSensorStatus        bool
+	IsEnvSensorFailStatus    bool
 	IsInternalBatteryVoltage bool
 	IsFirmwareVersion        bool
 	IsInternalTemperature    bool
@@ -130,7 +130,7 @@ type WaterTankLevel struct {
 type WeatherStation struct {
 	InternalBatteryVoltage float64
 	FirmwareVersion        uint64
-	EnvSensorStatus        bool
+	EnvSensorFailStatus    bool
 	C1State                bool
 	C1Count                uint64
 	C2State                bool
@@ -290,7 +290,7 @@ func protocolParserPort4(bytes []byte) string {
 	port4.IsEmwUv = false
 	port4.IsEmwSolarRadiation = false
 	port4.IsEmwAtmPres = false
-	port4.IsEnvSensorStatus = false
+	port4.IsEnvSensorFailStatus = false
 	port4.IsInternalBatteryVoltage = false
 	port4.IsFirmwareVersion = false
 	port4.IsC1State = false
@@ -313,7 +313,7 @@ func protocolParserPort4(bytes []byte) string {
 	// If Extended Internal Sensor Mask
 	if maskSensorInt>>7&0x01 == 0x01 {
 		maskSensorIntE = bytes[index]
-		port4.IsEnvSensorStatus = true
+		port4.IsEnvSensorFailStatus = true
 		// fmt.Printf("\nprotocolParserPort4 => maskSensorIntE %b", maskSensorIntE)
 		index = index + 1
 	}
@@ -327,10 +327,8 @@ func protocolParserPort4(bytes []byte) string {
 	// Verify Internal Humidity and Temperature fails
 	if maskSensorIntE>>0&0x01 == 0x01 {
 		// if 0x01&0x01 == 0x01 {
-		port4.EnvSensorStatus = false
-		// fmt.Printf("\nprotocolParserPort4 => EnvSensorStatus %s", port4.EnvSensorStatus)
-	} else {
-		port4.EnvSensorStatus = true
+		port4.EnvSensorFailStatus = true
+		// fmt.Printf("\nprotocolParserPort4 => EnvSensorFailStatus %s", port4.EnvSensorFailStatus)
 	}
 
 	// TODO: VERIFY CODE
@@ -1049,10 +1047,10 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 			sb.WriteString(`,powerSource=`)
 			sb.WriteString(strconv.FormatBool(weatherStation.PowerSource))
 
-			if port4.IsEnvSensorStatus == true {
-				weatherStation.EnvSensorStatus = port4.EnvSensorStatus
-				sb.WriteString(`,envSensorStatus=`)
-				sb.WriteString(strconv.FormatBool(weatherStation.EnvSensorStatus))
+			if port4.IsEnvSensorFailStatus == true {
+				weatherStation.EnvSensorFailStatus = port4.EnvSensorFailStatus
+				sb.WriteString(`,envSensorFailStatus=`)
+				sb.WriteString(strconv.FormatBool(weatherStation.EnvSensorFailStatus))
 			}
 			if port4.IsInternalBatteryVoltage == true {
 				weatherStation.InternalBatteryVoltage = port4.InternalBatteryVoltage
