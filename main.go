@@ -36,11 +36,11 @@ type Lns struct {
 	TxInfoModulation   string  `json:"txInfo_modulation"`
 	TxInfoBandWidth    uint64  `json:"txInfo_bandwidth"`
 	TxInfoSpreadFactor uint64  `json:"txInfo_spreadFactor"`
-	TxInfoCodeRate     string  `json:"txInfo_codeRate"`
-	FCnt               uint64  `json:"fCnt"`
-	FPort              uint64  `json:"fPort"`
-	FType              string  `json:"fType"`
-	Data               string  `json:"data"`
+	// TxInfoCodeRate     string  `json:"txInfo_codeRate"`
+	FCnt  uint64 `json:"fCnt"`
+	FPort uint64 `json:"fPort"`
+	FType string `json:"fType"`
+	Data  string `json:"data"`
 }
 type Evse struct {
 }
@@ -72,6 +72,14 @@ type Port100 struct {
 }
 
 type Port4 struct {
+	InternalBatteryVoltage float64
+	PowerSource            bool
+	FirmwareVersion        uint64
+	EnvSensorStatus        bool
+	C1State                bool
+	C1Count                uint64
+	C2State                bool
+	C2Count                uint64
 	InternalTemperature    float64
 	InternalHumidity       float64
 	EmwRainLevel           float64
@@ -84,16 +92,26 @@ type Port4 struct {
 	EmwUv                  float64
 	EmwSolarRadiation      float64
 	EmwAtmPres             float64
-	EnvSensorStatus        string
-	InternalBatteryVoltage float64
-	IsBattery              bool
-	FirmwareVersion        string
-	C1State                bool
-	C1Count                uint64
-	C2State                bool
-	C2Count                uint64
-	Power                  string
-	IsFirmware             bool
+
+	IsEnvSensorStatus        bool
+	IsInternalBatteryVoltage bool
+	IsFirmwareVersion        bool
+	IsInternalTemperature    bool
+	IsInternalHumidity       bool
+	IsC1State                bool
+	IsC1Count                bool
+	IsC2State                bool
+	IsC2Count                bool
+	IsEmwRainLevel           bool
+	IsEmwAvgWindSpeed        bool
+	IsEmwGustWindSpeed       bool
+	IsEmwWindDirection       bool
+	IsEmwTemperature         bool
+	IsEmwHumidity            bool
+	IsEmwLuminosity          bool
+	IsEmwUv                  bool
+	IsEmwSolarRadiation      bool
+	IsEmwAtmPres             bool
 }
 type SmartLight struct {
 	Temperature    float64 `json:"temperature"`
@@ -110,22 +128,26 @@ type WaterTankLevel struct {
 }
 
 type WeatherStation struct {
-	InternalTemperature float64 `json:"internalTemperature"`
-	InternalHumidity    float64 `json:"internalHumidity"`
-	C1State             bool    `json:"c1State"`
-	C1Count             uint64  `json:"c1Count"`
-	C2State             bool    `json:"c2State"`
-	C2Count             uint64  `json:"c2Count"`
-	EwmRainLevel        float64 `json:"rainLevel"`
-	EwmAvgWindSpeed     uint64  `json:"avgWindSpeed"`
-	EwmGustWindSpeed    uint64  `json:"gustWindSpeed"`
-	EwmWindDirection    uint64  `json:"windDirection"`
-	EwmTemperature      float64 `json:"temperature"`
-	EwmHumidity         uint64  `json:"humidity"`
-	EwmLuminosity       uint64  `json:"luminosity"`
-	EwmUv               float64 `json:"uv"`
-	EwmSolarRadiation   float64 `json:"solarRadiation"`
-	EmwAtmPres          float64 `json:"atmPressure"`
+	InternalBatteryVoltage float64
+	FirmwareVersion        uint64
+	EnvSensorStatus        bool
+	C1State                bool
+	C1Count                uint64
+	C2State                bool
+	C2Count                uint64
+	InternalTemperature    float64
+	InternalHumidity       float64
+	EmwRainLevel           float64
+	EmwAvgWindSpeed        uint64
+	EmwGustWindSpeed       uint64
+	EmwWindDirection       uint64
+	EmwTemperature         float64
+	EmwHumidity            uint64
+	EmwLuminosity          uint64
+	EmwUv                  float64
+	EmwSolarRadiation      float64
+	EmwAtmPres             float64
+	PowerSource            bool
 }
 
 type GaugePressure struct {
@@ -210,7 +232,7 @@ type LnsChirpStackV4Modulation struct {
 type LnsChirpStackV4Lora struct {
 	Bandwidth       uint64 `json:"bandwidth"`
 	SpreadingFactor uint64 `json:"spreadingFactor"`
-	CodeRate        string `json:"codeRate"`
+	// CodeRate        string `json:"codeRate"`
 }
 
 type LnsImt struct {
@@ -246,7 +268,7 @@ type LnsImtTxInfo struct {
 	Frequency float64        `json:"frequency"`
 	DataRate  LnsImtDataRate `json:"dataRate"`
 	Adr       bool           `json:"adr"`
-	CodeRate  string         `json:"codeRate"`
+	// CodeRate  string         `json:"codeRate"`
 }
 
 func roundFloat(val float64, precision uint) float64 {
@@ -256,6 +278,25 @@ func roundFloat(val float64, precision uint) float64 {
 
 func protocolParserPort4(bytes []byte) string {
 	var port4 Port4
+	port4.IsInternalTemperature = false
+	port4.IsInternalHumidity = false
+	port4.IsEmwRainLevel = false
+	port4.IsEmwAvgWindSpeed = false
+	port4.IsEmwGustWindSpeed = false
+	port4.IsEmwWindDirection = false
+	port4.IsEmwTemperature = false
+	port4.IsEmwHumidity = false
+	port4.IsEmwLuminosity = false
+	port4.IsEmwUv = false
+	port4.IsEmwSolarRadiation = false
+	port4.IsEmwAtmPres = false
+	port4.IsEnvSensorStatus = false
+	port4.IsInternalBatteryVoltage = false
+	port4.IsFirmwareVersion = false
+	port4.IsC1State = false
+	port4.IsC1Count = false
+	port4.IsC2State = false
+	port4.IsC2Count = false
 
 	var maskSensorInt byte
 	var maskSensorIntE byte
@@ -272,6 +313,7 @@ func protocolParserPort4(bytes []byte) string {
 	// If Extended Internal Sensor Mask
 	if maskSensorInt>>7&0x01 == 0x01 {
 		maskSensorIntE = bytes[index]
+		port4.IsEnvSensorStatus = true
 		// fmt.Printf("\nprotocolParserPort4 => maskSensorIntE %b", maskSensorIntE)
 		index = index + 1
 	}
@@ -285,22 +327,20 @@ func protocolParserPort4(bytes []byte) string {
 	// Verify Internal Humidity and Temperature fails
 	if maskSensorIntE>>0&0x01 == 0x01 {
 		// if 0x01&0x01 == 0x01 {
-		port4.EnvSensorStatus = "fail"
+		port4.EnvSensorStatus = false
 		// fmt.Printf("\nprotocolParserPort4 => EnvSensorStatus %s", port4.EnvSensorStatus)
 	} else {
-		port4.EnvSensorStatus = "ok"
-
+		port4.EnvSensorStatus = true
 	}
 
 	// TODO: VERIFY CODE
 	// Decode Battery
 	// If bit 0 of maskSensorInt exists
 	if maskSensorInt>>0&0x01 == 0x01 {
-		port4.IsBattery = true
+		port4.IsInternalBatteryVoltage = true
 		if maskSensorInt>>6&0x01 == 0x01 {
 			v := bytes[index]
 			f := roundFloat(float64((v/120.0)+1), 2)
-
 			port4.InternalBatteryVoltage = f
 		} else {
 			v := bytes[index]
@@ -308,8 +348,6 @@ func protocolParserPort4(bytes []byte) string {
 			port4.InternalBatteryVoltage = f
 		}
 		index = index + 1
-	} else {
-		port4.IsBattery = false
 	}
 	// fmt.Printf("\nprotocolParserPort4 => IsBattery %d", port4.IsBattery)
 
@@ -317,7 +355,7 @@ func protocolParserPort4(bytes []byte) string {
 	// Decode Firmware Version
 	// Verify if firmware version appear on message
 	if maskSensorInt>>2&0x01 == 0x01 {
-		port4.IsFirmware = true
+		port4.IsFirmwareVersion = true
 		v := uint64(bytes[index])
 		v |= uint64(bytes[index+2]) << 8
 		v |= uint64(bytes[index+3]) << 16
@@ -331,23 +369,22 @@ func protocolParserPort4(bytes []byte) string {
 		// firmware.v = hardware + '.' + compatibility + '.' + feature + '.' + bug;
 		// data.device.push(firmware);
 		index = index + 3
-	} else {
-		port4.IsFirmware = false
 	}
 	// fmt.Printf("\nprotocolParserPort4 => IsFirmware %d", port4.IsFirmware)
 
 	// Decode External Power or Battery
 	if maskSensorInt>>5&0x01 == 0x01 {
-		s := "external"
-		port4.Power = s
+		b := true
+		port4.PowerSource = b
 	} else {
-		s := "battery"
-		port4.Power = s
+		b := false
+		port4.PowerSource = b
 	}
 	// fmt.Printf("\nprotocolParserPort4 => Power Source %d", port4.Power)
 
 	// Decode Temperature Int
 	if maskSensorInt>>3&0x01 == 0x01 {
+		port4.IsInternalTemperature = true
 		v := uint64(bytes[index])
 		v |= uint64(bytes[index+1]) << 8
 		f := roundFloat((float64(v)/100)-273.15, 2)
@@ -358,7 +395,7 @@ func protocolParserPort4(bytes []byte) string {
 
 	// Decode Moisture Int
 	if maskSensorInt>>4&0x01 == 0x01 {
-		// .round(2)
+		port4.IsInternalHumidity = true
 		v := uint64(bytes[index])
 		v |= uint64(bytes[index+1]) << 8
 		f := roundFloat((float64(v) / 10), 2)
@@ -370,6 +407,7 @@ func protocolParserPort4(bytes []byte) string {
 	// Decode Drys
 	// Decode Dry 1 State
 	if maskSensorExt>>0&0x01 == 0x01 {
+		port4.IsC1State = true
 		if bytes[index] == 0x01 {
 			b := true
 			port4.C1State = b
@@ -383,6 +421,7 @@ func protocolParserPort4(bytes []byte) string {
 
 	// Decode Dry 1 Count
 	if maskSensorExt>>1&0x01 == 0x01 {
+		port4.IsC1Count = true
 		v := uint64(bytes[index])
 		v |= uint64(bytes[index+1]) << 8
 		port4.C1Count = v
@@ -392,6 +431,7 @@ func protocolParserPort4(bytes []byte) string {
 
 	// Decode Dry 2 State
 	if maskSensorExt>>2&0x01 == 0x01 {
+		port4.IsC2State = true
 		if bytes[index] == 0x01 {
 			b := true
 			port4.C2State = b
@@ -405,6 +445,7 @@ func protocolParserPort4(bytes []byte) string {
 
 	// Decode Dry 2 Count
 	if maskSensorExt>>3&0x01 == 0x01 {
+		port4.IsC2Count = true
 		v := uint64(bytes[index])
 		v |= uint64(bytes[index+1]) << 8
 		port4.C2Count = v
@@ -490,6 +531,7 @@ func protocolParserPort4(bytes []byte) string {
 			//Weather Station
 			if maskEmw104>>0&0x01 == 0x01 {
 				//Rain
+				port4.IsEmwRainLevel = true
 				v := uint64(bytes[index]) << 8
 				v |= uint64(bytes[index+1])
 				f := roundFloat((float64(v) / 10), 1)
@@ -498,18 +540,21 @@ func protocolParserPort4(bytes []byte) string {
 				// fmt.Printf("\nprotocolParserPort4 => EmwRainLevel %d", port4.EmwRainLevel)
 
 				//Average Wind Speed
+				port4.IsEmwAvgWindSpeed = true
 				v = uint64(bytes[index])
 				port4.EmwAvgWindSpeed = v
 				// fmt.Printf("\nprotocolParserPort4 => EmwAvgWindSpeed %d", port4.EmwAvgWindSpeed)
 				index = index + 1
 
 				//Gust Wind Speed
+				port4.IsEmwGustWindSpeed = true
 				v = uint64(bytes[index])
 				port4.EmwGustWindSpeed = v
 				// fmt.Printf("\nprotocolParserPort4 => EmwGustWindSpeed %d", port4.EmwGustWindSpeed)
 				index = index + 1
 
 				//Wind Direction
+				port4.IsEmwWindDirection = true
 				v = uint64(bytes[index]) << 8
 				v |= uint64(bytes[index+1])
 				port4.EmwWindDirection = v
@@ -517,6 +562,7 @@ func protocolParserPort4(bytes []byte) string {
 				index = index + 2
 
 				//Temperature
+				port4.IsEmwTemperature = true
 				v = uint64(bytes[index]) << 8
 				v |= uint64(bytes[index+1])
 				f = roundFloat((float64(v)/10)-273.15, 2)
@@ -525,6 +571,7 @@ func protocolParserPort4(bytes []byte) string {
 				index = index + 2
 
 				//Humidity
+				port4.IsEmwHumidity = true
 				v = uint64(bytes[index])
 				port4.EmwHumidity = v
 				// fmt.Printf("\nprotocolParserPort4 => EmwHumidity %d", port4.EmwHumidity)
@@ -532,12 +579,14 @@ func protocolParserPort4(bytes []byte) string {
 			}
 			//Lux and UV
 			if maskEmw104>>1&0x01 == 0x01 {
+				port4.IsEmwLuminosity = true
 				v := uint64(bytes[index]) << 16
 				v |= uint64(bytes[index+1]) << 8
 				v |= uint64(bytes[index+2])
 				port4.EmwLuminosity = v
 				// fmt.Printf("\nprotocolParserPort4 => EmwLuminosity %d", port4.EmwLuminosity)
 
+				port4.IsEmwUv = true
 				v = uint64(bytes[index+3])
 				f := roundFloat((float64(v) / 10), 1)
 				port4.EmwUv = f
@@ -547,6 +596,7 @@ func protocolParserPort4(bytes []byte) string {
 
 			//Pyranometer
 			if maskEmw104>>2&0x01 == 0x01 {
+				port4.IsEmwSolarRadiation = true
 				v := uint64(bytes[index]) << 8
 				v |= uint64(bytes[index+1])
 				f := roundFloat((float64(v) / 10), 1)
@@ -557,6 +607,7 @@ func protocolParserPort4(bytes []byte) string {
 
 			//Barometer
 			if maskEmw104>>3&0x01 == 0x01 {
+				port4.IsEmwAtmPres = true
 				v := uint64(bytes[index]) << 16
 				v |= uint64(bytes[index+1]) << 8
 				v |= uint64(bytes[index+2])
@@ -993,56 +1044,106 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 		switch measurement {
 		case "WeatherStation":
 			var weatherStation WeatherStation
-			weatherStation.InternalTemperature = port4.InternalTemperature
-			weatherStation.InternalHumidity = port4.InternalHumidity
-			weatherStation.C1State = port4.C1State
-			weatherStation.C1Count = port4.C1Count
-			weatherStation.C2State = port4.C2State
-			weatherStation.C2Count = port4.C2Count
-			weatherStation.EwmRainLevel = port4.EmwRainLevel
-			weatherStation.EwmAvgWindSpeed = port4.EmwAvgWindSpeed
-			weatherStation.EwmGustWindSpeed = port4.EmwGustWindSpeed
-			weatherStation.EwmWindDirection = port4.EmwWindDirection
-			weatherStation.EwmTemperature = port4.EmwTemperature
-			weatherStation.EwmHumidity = port4.EmwHumidity
-			weatherStation.EwmLuminosity = port4.EmwLuminosity
-			weatherStation.EwmUv = port4.EmwUv
-			weatherStation.EwmSolarRadiation = port4.EmwSolarRadiation
-			weatherStation.EmwAtmPres = port4.EmwAtmPres
 
-			sb.WriteString(`,internalTemperature=`)
-			sb.WriteString(strconv.FormatFloat(weatherStation.InternalTemperature, 'f', -1, 64))
-			sb.WriteString(`,internalHumidity=`)
-			sb.WriteString(strconv.FormatFloat(weatherStation.InternalHumidity, 'f', -1, 64))
-			sb.WriteString(`,c1State=`)
-			sb.WriteString(strconv.FormatBool(weatherStation.C1State))
-			sb.WriteString(`,c1Count=`)
-			sb.WriteString(strconv.FormatUint(uint64(weatherStation.C1Count), 10))
-			sb.WriteString(`,c2State=`)
-			sb.WriteString(strconv.FormatBool(weatherStation.C2State))
-			sb.WriteString(`,c2Count=`)
-			sb.WriteString(strconv.FormatUint(uint64(weatherStation.C2Count), 10))
-			sb.WriteString(`,ewmRainLevel=`)
-			sb.WriteString(strconv.FormatFloat(weatherStation.EwmRainLevel, 'f', -1, 64))
-			sb.WriteString(`,ewmAvgWindSpeed=`)
-			sb.WriteString(strconv.FormatUint(uint64(weatherStation.EwmAvgWindSpeed), 10))
-			sb.WriteString(`,EwmGustWindSpeed=`)
-			sb.WriteString(strconv.FormatUint(uint64(weatherStation.EwmGustWindSpeed), 10))
-			sb.WriteString(`,ewmWindDirection=`)
-			sb.WriteString(strconv.FormatUint(uint64(weatherStation.EwmWindDirection), 10))
-			sb.WriteString(`,ewmTemperature=`)
-			sb.WriteString(strconv.FormatFloat(weatherStation.EwmTemperature, 'f', -1, 64))
-			sb.WriteString(`,ewmHumidity=`)
-			sb.WriteString(strconv.FormatUint(uint64(weatherStation.EwmHumidity), 10))
-			sb.WriteString(`,ewmLuminosity=`)
-			sb.WriteString(strconv.FormatUint(uint64(weatherStation.EwmLuminosity), 10))
-			sb.WriteString(`,ewmUv=`)
-			sb.WriteString(strconv.FormatFloat(weatherStation.EwmUv, 'f', -1, 64))
-			sb.WriteString(`,ewmSolarRadiation=`)
-			sb.WriteString(strconv.FormatFloat(weatherStation.EwmSolarRadiation, 'f', -1, 64))
-			sb.WriteString(`,emwAtmPres=`)
-			sb.WriteString(strconv.FormatFloat(weatherStation.EmwAtmPres, 'f', -1, 64))
+			weatherStation.PowerSource = port4.PowerSource
+			sb.WriteString(`,powerSource=`)
+			sb.WriteString(strconv.FormatBool(weatherStation.PowerSource))
 
+			if port4.IsEnvSensorStatus == true {
+				weatherStation.EnvSensorStatus = port4.EnvSensorStatus
+				sb.WriteString(`,envSensorStatus=`)
+				sb.WriteString(strconv.FormatBool(weatherStation.EnvSensorStatus))
+			}
+			if port4.IsInternalBatteryVoltage == true {
+				weatherStation.InternalBatteryVoltage = port4.InternalBatteryVoltage
+				sb.WriteString(`,internalBatteryVoltage=`)
+				sb.WriteString(strconv.FormatFloat(weatherStation.InternalBatteryVoltage, 'f', -1, 64))
+			}
+			if port4.IsFirmwareVersion == true {
+				weatherStation.FirmwareVersion = port4.FirmwareVersion
+				sb.WriteString(`,firmwareVersion=`)
+				sb.WriteString(strconv.FormatUint(weatherStation.FirmwareVersion, 10))
+			}
+			if port4.IsC1State == true {
+				weatherStation.C1State = port4.C1State
+				sb.WriteString(`,c1State=`)
+				sb.WriteString(strconv.FormatBool(weatherStation.C1State))
+			}
+			if port4.IsC1Count == true {
+				weatherStation.C1Count = port4.C1Count
+				sb.WriteString(`,c1Count=`)
+				sb.WriteString(strconv.FormatUint(weatherStation.C1Count, 10))
+			}
+			if port4.IsC2State == true {
+				weatherStation.C2State = port4.C2State
+				sb.WriteString(`,c2State=`)
+				sb.WriteString(strconv.FormatBool(weatherStation.C2State))
+			}
+			if port4.IsC2Count == true {
+				weatherStation.C2Count = port4.C2Count
+				sb.WriteString(`,c2Count=`)
+				sb.WriteString(strconv.FormatUint(weatherStation.C2Count, 10))
+			}
+			if port4.IsInternalTemperature == true {
+				weatherStation.InternalTemperature = port4.InternalTemperature
+				sb.WriteString(`,internalTemperature=`)
+				sb.WriteString(strconv.FormatFloat(weatherStation.InternalTemperature, 'f', -1, 64))
+			}
+			if port4.IsInternalHumidity == true {
+				weatherStation.InternalHumidity = port4.InternalHumidity
+				sb.WriteString(`,internalHumidity=`)
+				sb.WriteString(strconv.FormatFloat(weatherStation.InternalHumidity, 'f', -1, 64))
+			}
+			if port4.IsEmwRainLevel == true {
+				weatherStation.EmwRainLevel = port4.EmwRainLevel
+				sb.WriteString(`,emwRainLevel=`)
+				sb.WriteString(strconv.FormatFloat(weatherStation.EmwRainLevel, 'f', -1, 64))
+			}
+			if port4.IsEmwAvgWindSpeed == true {
+				weatherStation.EmwAvgWindSpeed = port4.EmwAvgWindSpeed
+				sb.WriteString(`,emwAvgWindSpeed=`)
+				sb.WriteString(strconv.FormatUint(weatherStation.EmwAvgWindSpeed, 10))
+			}
+			if port4.IsEmwGustWindSpeed == true {
+				weatherStation.EmwGustWindSpeed = port4.EmwGustWindSpeed
+				sb.WriteString(`,emwGustWindSpeed=`)
+				sb.WriteString(strconv.FormatUint(weatherStation.EmwGustWindSpeed, 10))
+			}
+			if port4.IsEmwWindDirection == true {
+				weatherStation.EmwWindDirection = port4.EmwWindDirection
+				sb.WriteString(`,emwWindDirection=`)
+				sb.WriteString(strconv.FormatUint(weatherStation.EmwWindDirection, 10))
+			}
+			if port4.IsEmwTemperature == true {
+				weatherStation.EmwTemperature = port4.EmwTemperature
+				sb.WriteString(`,emwTemperature=`)
+				sb.WriteString(strconv.FormatFloat(weatherStation.EmwTemperature, 'f', -1, 64))
+			}
+			if port4.IsEmwHumidity == true {
+				weatherStation.EmwHumidity = port4.EmwHumidity
+				sb.WriteString(`,emwHumidity=`)
+				sb.WriteString(strconv.FormatUint(weatherStation.EmwHumidity, 10))
+			}
+			if port4.IsEmwLuminosity == true {
+				weatherStation.EmwLuminosity = port4.EmwLuminosity
+				sb.WriteString(`,emwLuminosity=`)
+				sb.WriteString(strconv.FormatUint(weatherStation.EmwLuminosity, 10))
+			}
+			if port4.IsEmwUv == true {
+				weatherStation.EmwUv = port4.EmwUv
+				sb.WriteString(`,emwUv=`)
+				sb.WriteString(strconv.FormatFloat(weatherStation.EmwUv, 'f', -1, 64))
+			}
+			if port4.IsEmwSolarRadiation == true {
+				weatherStation.EmwSolarRadiation = port4.EmwSolarRadiation
+				sb.WriteString(`,emwSolarRadiation=`)
+				sb.WriteString(strconv.FormatFloat(weatherStation.EmwSolarRadiation, 'f', -1, 64))
+			}
+			if port4.IsEmwAtmPres == true {
+				weatherStation.EmwAtmPres = port4.EmwAtmPres
+				sb.WriteString(`,emwAtmPres=`)
+				sb.WriteString(strconv.FormatFloat(weatherStation.EmwAtmPres, 'f', -1, 64))
+			}
 		default:
 		}
 	}
@@ -1084,7 +1185,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		lns.TxInfoModulation = lnsImt.TxInfo.DataRate.Modulation
 		lns.TxInfoBandWidth = lnsImt.TxInfo.DataRate.Bandwidth
 		lns.TxInfoSpreadFactor = lnsImt.TxInfo.DataRate.SpreadFactor
-		lns.TxInfoCodeRate = lnsImt.TxInfo.CodeRate
+		// lns.TxInfoCodeRate = lnsImt.TxInfo.CodeRate
 		lns.FCnt = lnsImt.FCnt
 		lns.FPort = lnsImt.FPort
 		lns.FType = "uplink"
@@ -1095,7 +1196,6 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		// fmt.Printf("\nmessage from chirpstackv4 parseLns %s", message)
 
 		lns.Measurement = measurement
-
 		lns.DeviceId = lnsChirpStackV4.DeviceInfo.DevEui
 		lns.RxInfoMac_0 = lnsChirpStackV4.RxInfo[0].GatewayId
 		lns.RxInfoTime_0 = lnsChirpStackV4.RxInfo[0].NsTime.UnixNano()
@@ -1106,11 +1206,10 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		lns.RxInfoAlt_0 = lnsChirpStackV4.RxInfo[0].Location.Altitude
 		lns.TxInfoFrequency = lnsChirpStackV4.TxInfo.Frequency / 1000000
 		lns.TxInfoModulation = "LORA"
-		lns.TxInfoBandWidth = lnsChirpStackV4.TxInfo.Modulation.Lora.Bandwidth
+		lns.TxInfoBandWidth = lnsChirpStackV4.TxInfo.Modulation.Lora.Bandwidth / 1000
 		lns.TxInfoSpreadFactor = lnsChirpStackV4.TxInfo.Modulation.Lora.SpreadingFactor
-		lns.TxInfoCodeRate = lnsChirpStackV4.TxInfo.Modulation.Lora.CodeRate
+		// lns.TxInfoCodeRate = lnsChirpStackV4.TxInfo.Modulation.Lora.CodeRate
 		lns.FCnt = lnsChirpStackV4.FCnt
-
 		lns.FPort = lnsChirpStackV4.FPort
 		lns.FType = "uplink"
 		lns.Data = lnsChirpStackV4.Data
@@ -1160,8 +1259,8 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(lns.RxInfoMac_0)
 		sb.WriteString(`,txModulation=`)
 		sb.WriteString(lns.TxInfoModulation)
-		sb.WriteString(`,txCodeRate=`)
-		sb.WriteString(lns.TxInfoCodeRate)
+		// sb.WriteString(`,txCodeRate=`)
+		// sb.WriteString(lns.TxInfoCodeRate)
 
 		// Fields
 		sb.WriteString(` `)
