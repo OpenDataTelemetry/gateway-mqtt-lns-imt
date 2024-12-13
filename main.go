@@ -1014,12 +1014,16 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 			sb.WriteString(strconv.FormatFloat(weatherStation.InternalTemperature, 'f', -1, 64))
 			sb.WriteString(`,internalHumidity=`)
 			sb.WriteString(strconv.FormatFloat(weatherStation.InternalHumidity, 'f', -1, 64))
-			sb.WriteString(`,c1State=`)
-			sb.WriteString(weatherStation.C1State)
+			if weatherStation.C1State != "" {
+				sb.WriteString(`,c1State=`)
+				sb.WriteString(weatherStation.C1State)
+			}
 			sb.WriteString(`,c1Count=`)
 			sb.WriteString(strconv.FormatUint(uint64(weatherStation.C1Count), 10))
-			sb.WriteString(`,c2State=`)
-			sb.WriteString(weatherStation.C2State)
+			if weatherStation.C2State != "" {
+				sb.WriteString(`,c2State=`)
+				sb.WriteString(weatherStation.C2State)
+			}
 			sb.WriteString(`,c2Count=`)
 			sb.WriteString(strconv.FormatUint(uint64(weatherStation.C2Count), 10))
 			sb.WriteString(`,ewmRainLevel=`)
