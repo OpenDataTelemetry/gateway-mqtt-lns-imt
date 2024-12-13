@@ -88,9 +88,9 @@ type Port4 struct {
 	InternalBatteryVoltage float64
 	IsBattery              bool
 	FirmwareVersion        string
-	C1State                string
+	C1State                bool
 	C1Count                uint64
-	C2State                string
+	C2State                bool
 	C2Count                uint64
 	Power                  string
 	IsFirmware             bool
@@ -112,9 +112,9 @@ type WaterTankLevel struct {
 type WeatherStation struct {
 	InternalTemperature float64 `json:"internalTemperature"`
 	InternalHumidity    float64 `json:"internalHumidity"`
-	C1State             string  `json:"c1State"`
+	C1State             bool    `json:"c1State"`
 	C1Count             uint64  `json:"c1Count"`
-	C2State             string  `json:"c2State"`
+	C2State             bool    `json:"c2State"`
 	C2Count             uint64  `json:"c2Count"`
 	EwmRainLevel        float64 `json:"rainLevel"`
 	EwmAvgWindSpeed     uint64  `json:"avgWindSpeed"`
@@ -371,11 +371,11 @@ func protocolParserPort4(bytes []byte) string {
 	// Decode Dry 1 State
 	if maskSensorExt>>0&0x01 == 0x01 {
 		if bytes[index] == 0x01 {
-			s := "closed"
-			port4.C1State = s
+			b := true
+			port4.C1State = b
 		} else {
-			s := "open"
-			port4.C1State = s
+			b := false
+			port4.C1State = b
 		}
 		index = index + 1
 		// fmt.Printf("\nprotocolParserPort4 => C1State %d", port4.C1State)
@@ -393,11 +393,11 @@ func protocolParserPort4(bytes []byte) string {
 	// Decode Dry 2 State
 	if maskSensorExt>>2&0x01 == 0x01 {
 		if bytes[index] == 0x01 {
-			s := "closed"
-			port4.C2State = s
+			b := true
+			port4.C2State = b
 		} else {
-			s := "open"
-			port4.C2State = s
+			b := false
+			port4.C2State = b
 		}
 		index = index + 1
 		// fmt.Printf("\nprotocolParserPort4 => C2State %d", port4.C2State)
@@ -1014,16 +1014,12 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 			sb.WriteString(strconv.FormatFloat(weatherStation.InternalTemperature, 'f', -1, 64))
 			sb.WriteString(`,internalHumidity=`)
 			sb.WriteString(strconv.FormatFloat(weatherStation.InternalHumidity, 'f', -1, 64))
-			if weatherStation.C1State != "" {
-				sb.WriteString(`,c1State=`)
-				sb.WriteString(weatherStation.C1State)
-			}
+			sb.WriteString(`,c1State=`)
+			sb.WriteString(strconv.FormatBool(weatherStation.C1State))
 			sb.WriteString(`,c1Count=`)
 			sb.WriteString(strconv.FormatUint(uint64(weatherStation.C1Count), 10))
-			if weatherStation.C2State != "" {
-				sb.WriteString(`,c2State=`)
-				sb.WriteString(weatherStation.C2State)
-			}
+			sb.WriteString(`,c2State=`)
+			sb.WriteString(strconv.FormatBool(weatherStation.C2State))
 			sb.WriteString(`,c2Count=`)
 			sb.WriteString(strconv.FormatUint(uint64(weatherStation.C2Count), 10))
 			sb.WriteString(`,ewmRainLevel=`)
