@@ -22,25 +22,51 @@ type Influx struct {
 	Fields      any    `json:"fields"`
 	Timestamp   uint64 `json:"timestamp"`
 }
-type Lns struct {
-	Measurement        string  `json:"measurement"`
-	DeviceId           string  `json:"LNS"`
-	RxInfoMac_0        string  `json:"rxInfo_mac_0"`
-	RxInfoTime_0       int64   `json:"rxInfo_time_0"`
-	RxInfoRssi_0       int64   `json:"rxInfo_rssi_0"`
-	RxInfoSnr_0        float64 `json:"rxInfo_snr_0"`
-	RxInfoLat_0        float64 `json:"rxInfo_lat_0"`
-	RxInfoLon_0        float64 `json:"rxInfo_lon_0"`
-	RxInfoAlt_0        uint64  `json:"rxInfo_alt_0"`
-	TxInfoFrequency    float64 `json:"txInfo_frequency"`
-	TxInfoModulation   string  `json:"txInfo_modulation"`
-	TxInfoBandWidth    uint64  `json:"txInfo_bandwidth"`
-	TxInfoSpreadFactor uint64  `json:"txInfo_spreadFactor"`
+type LnsUp struct {
+	Measurement        string  // `json:"measurement"`
+	DeviceId           string  // `json:"deviceId"`
+	RxInfoMac_0        string  // `json:"rxInfo_mac_0"`
+	RxInfoTime_0       int64   // `json:"rxInfo_time_0"`
+	RxInfoRssi_0       int64   // `json:"rxInfo_rssi_0"`
+	RxInfoSnr_0        float64 // `json:"rxInfo_snr_0"`
+	RxInfoLat_0        float64 // `json:"rxInfo_lat_0"`
+	RxInfoLon_0        float64 // `json:"rxInfo_lon_0"`
+	RxInfoAlt_0        uint64  // `json:"rxInfo_alt_0"`
+	TxInfoFrequency    float64 // `json:"txInfo_frequency"`
+	TxInfoModulation   string  // `json:"txInfo_modulation"`
+	TxInfoBandWidth    uint64  // `json:"txInfo_bandwidth"`
+	TxInfoSpreadFactor uint64  // `json:"txInfo_spreadFactor"`
 	// TxInfoCodeRate     string  `json:"txInfo_codeRate"`
 	FCnt  uint64 `json:"fCnt"`
 	FPort uint64 `json:"fPort"`
 	FType string `json:"fType"`
 	Data  string `json:"data"`
+}
+
+type LnsDown struct {
+	Measurement string
+	Reference   string
+	DeviceId    string
+	Confirmed   bool
+	FPort       uint64
+	Data        string
+	Timestamp   uint64
+	// Object any
+}
+
+type LnsImtDown struct {
+	Reference string
+	Confirmed bool
+	FPort     uint64
+	Data      string
+}
+
+type LnsChirpstackV4Down struct {
+	DeviceId  string
+	Confirmed bool
+	FPort     uint64
+	Data      string
+	// Object any
 }
 type Evse struct {
 }
@@ -167,21 +193,21 @@ type EnergyMeter struct {
 	BoardVoltage  float64 `json:"boardVoltage"`
 }
 
-type LnsChirpStackV4 struct {
-	DeduplicationId string                    `json:"deduplicationId"`
-	DeviceInfo      LnsChirpStackV4DeviceInfo `json:"deviceInfo"`
-	DevAddr         string                    `json:"devAddr"`
-	Adr             bool                      `json:"adr"`
-	Dr              uint64                    `json:"dr"`
-	FCnt            uint64                    `json:"fCnt"`
-	FPort           uint64                    `json:"fPort"`
-	Confirmed       string                    `json:"Confirmed"`
-	RxInfo          []LnsChirpStackV4RxInfo   `json:"rxInfo"`
-	TxInfo          LnsChirpStackV4TxInfo     `json:"txInfo"`
-	Data            string                    `json:"data"`
+type LnsChirpStackV4Up struct {
+	DeduplicationId string                      `json:"deduplicationId"`
+	DeviceInfo      LnsChirpStackV4UpDeviceInfo `json:"deviceInfo"`
+	DevAddr         string                      `json:"devAddr"`
+	Adr             bool                        `json:"adr"`
+	Dr              uint64                      `json:"dr"`
+	FCnt            uint64                      `json:"fCnt"`
+	FPort           uint64                      `json:"fPort"`
+	Confirmed       string                      `json:"Confirmed"`
+	RxInfo          []LnsChirpStackV4UpRxInfo   `json:"rxInfo"`
+	TxInfo          LnsChirpStackV4UpTxInfo     `json:"txInfo"`
+	Data            string                      `json:"data"`
 }
 
-type LnsChirpStackV4DeviceInfo struct {
+type LnsChirpStackV4UpDeviceInfo struct {
 	TenantId           string `json:"tenantId"`
 	TenantName         string `json:"tenantName"`
 	ApplicationId      string `json:"applicationId"`
@@ -194,60 +220,60 @@ type LnsChirpStackV4DeviceInfo struct {
 	Tags               any    `json:"tags"`
 }
 
-type LnsChirpStackV4RxInfo struct {
-	GatewayId         string                  `json:"gatewayId"`
-	UplinkId          uint64                  `json:"uplinkId"`
-	NsTime            time.Time               `json:"nsTime"`
-	TimeSinceGpsEpoch string                  `json:"timeSinceGpsEpoch"`
-	Rssi              int64                   `json:"rssi"`
-	Snr               float64                 `json:"snr"`
-	Channel           uint64                  `json:"channel"`
-	Board             uint64                  `json:"board"`
-	Location          LnsChirpStackV4Location `json:"location"`
-	Context           string                  `json:"context"`
-	Metadata          LnsChirpStackV4Metadata `json:"metadata"`
-	CrcStatus         string                  `json:"crcStatus"`
+type LnsChirpStackV4UpRxInfo struct {
+	GatewayId         string                    `json:"gatewayId"`
+	UplinkId          uint64                    `json:"uplinkId"`
+	NsTime            time.Time                 `json:"nsTime"`
+	TimeSinceGpsEpoch string                    `json:"timeSinceGpsEpoch"`
+	Rssi              int64                     `json:"rssi"`
+	Snr               float64                   `json:"snr"`
+	Channel           uint64                    `json:"channel"`
+	Board             uint64                    `json:"board"`
+	Location          LnsChirpStackV4UpLocation `json:"location"`
+	Context           string                    `json:"context"`
+	Metadata          LnsChirpStackV4UpMetadata `json:"metadata"`
+	CrcStatus         string                    `json:"crcStatus"`
 }
 
-type LnsChirpStackV4Location struct {
+type LnsChirpStackV4UpLocation struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 	Altitude  uint64  `json:"altitude"`
 }
 
-type LnsChirpStackV4Metadata struct {
+type LnsChirpStackV4UpMetadata struct {
 	Region_config_id   string `json:"region_config_id"`
 	Region_common_name string `json:"region_common_name"`
 }
 
-type LnsChirpStackV4TxInfo struct {
-	Frequency  float64                   `json:"frequency"`
-	Modulation LnsChirpStackV4Modulation `json:"modulation"`
+type LnsChirpStackV4UpTxInfo struct {
+	Frequency  float64                     `json:"frequency"`
+	Modulation LnsChirpStackV4UpModulation `json:"modulation"`
 }
 
-type LnsChirpStackV4Modulation struct {
-	Lora LnsChirpStackV4Lora `json:"lora"`
+type LnsChirpStackV4UpModulation struct {
+	Lora LnsChirpStackV4UpLora `json:"lora"`
 }
 
-type LnsChirpStackV4Lora struct {
+type LnsChirpStackV4UpLora struct {
 	Bandwidth       uint64 `json:"bandwidth"`
 	SpreadingFactor uint64 `json:"spreadingFactor"`
 	// CodeRate        string `json:"codeRate"`
 }
 
-type LnsImt struct {
-	ApplicationID   string         `json:"applicationID"`
-	ApplicationName string         `json:"applicationName"`
-	NodeName        string         `json:"nodeName"`
-	DevEUI          string         `json:"devEUI"`
-	RxInfo          []LnsImtRxInfo `json:"rxInfo"`
-	TxInfo          LnsImtTxInfo   `json:"txInfo"`
-	FCnt            uint64         `json:"fCnt"`
-	FPort           uint64         `json:"FPort"`
-	Data            string         `json:"data"`
+type LnsImtUp struct {
+	ApplicationID   string           `json:"applicationID"`
+	ApplicationName string           `json:"applicationName"`
+	NodeName        string           `json:"nodeName"`
+	DevEUI          string           `json:"devEUI"`
+	RxInfo          []LnsImtUpRxInfo `json:"rxInfo"`
+	TxInfo          LnsImtUpTxInfo   `json:"txInfo"`
+	FCnt            uint64           `json:"fCnt"`
+	FPort           uint64           `json:"FPort"`
+	Data            string           `json:"data"`
 }
 
-type LnsImtRxInfo struct {
+type LnsImtUpRxInfo struct {
 	Mac       string    `json:"mac"`
 	Time      time.Time `json:"time"`
 	Rssi      int64     `json:"rssi"`
@@ -258,16 +284,16 @@ type LnsImtRxInfo struct {
 	Altitude  uint64    `json:"altitude"`
 }
 
-type LnsImtDataRate struct {
+type LnsImtUpDataRate struct {
 	Modulation   string `json:"modulation"`
 	Bandwidth    uint64 `json:"bandwidth"`
 	SpreadFactor uint64 `json:"spreadFactor"`
 }
 
-type LnsImtTxInfo struct {
-	Frequency float64        `json:"frequency"`
-	DataRate  LnsImtDataRate `json:"dataRate"`
-	Adr       bool           `json:"adr"`
+type LnsImtUpTxInfo struct {
+	Frequency float64          `json:"frequency"`
+	DataRate  LnsImtUpDataRate `json:"dataRate"`
+	Adr       bool             `json:"adr"`
 	// CodeRate  string         `json:"codeRate"`
 }
 
@@ -1150,9 +1176,12 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 
 func parseLns(measurement string, deviceId string, direction string, etc string, message string) string {
 	var sb strings.Builder
-	var lns Lns
-	var lnsImt LnsImt
-	var lnsChirpStackV4 LnsChirpStackV4
+	var lnsUp LnsUp
+	var lnsDown LnsDown
+	var lnsImtUp LnsImtUp
+	// var lnsImtDown LnsImtDown
+	var lnsChirpStackV4Up LnsChirpStackV4Up
+	// var lnsChirpstackV4Down LnsChirpstackV4Down
 
 	// fmt.Printf("\nmeasurement %s", measurement)
 	// fmt.Printf("\ndeviceId %s", deviceId)
@@ -1168,50 +1197,70 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 
 	switch etc {
 	case "imt":
-		json.Unmarshal([]byte(message), &lnsImt)
+		if direction == "up" {
+			json.Unmarshal([]byte(message), &lnsImtUp)
 
-		lns.Measurement = measurement
-		lns.DeviceId = lnsImt.DevEUI
-		lns.RxInfoMac_0 = lnsImt.RxInfo[0].Mac
-		lns.RxInfoTime_0 = lnsImt.RxInfo[0].Time.Unix() * 1000 * 1000 * 1000
-		lns.RxInfoRssi_0 = lnsImt.RxInfo[0].Rssi
-		lns.RxInfoSnr_0 = lnsImt.RxInfo[0].LoRaSNR
-		lns.RxInfoLat_0 = lnsImt.RxInfo[0].Latitude
-		lns.RxInfoLon_0 = lnsImt.RxInfo[0].Longitude
-		lns.RxInfoAlt_0 = lnsImt.RxInfo[0].Altitude
-		lns.TxInfoFrequency = lnsImt.TxInfo.Frequency / 1000000
-		lns.TxInfoModulation = lnsImt.TxInfo.DataRate.Modulation
-		lns.TxInfoBandWidth = lnsImt.TxInfo.DataRate.Bandwidth
-		lns.TxInfoSpreadFactor = lnsImt.TxInfo.DataRate.SpreadFactor
-		// lns.TxInfoCodeRate = lnsImt.TxInfo.CodeRate
-		lns.FCnt = lnsImt.FCnt
-		lns.FPort = lnsImt.FPort
-		lns.FType = "uplink"
-		lns.Data = lnsImt.Data
+			lnsUp.Measurement = measurement
+			lnsUp.DeviceId = lnsImtUp.DevEUI
+			lnsUp.RxInfoMac_0 = lnsImtUp.RxInfo[0].Mac
+			lnsUp.RxInfoTime_0 = lnsImtUp.RxInfo[0].Time.Unix() * 1000 * 1000 * 1000
+			lnsUp.RxInfoRssi_0 = lnsImtUp.RxInfo[0].Rssi
+			lnsUp.RxInfoSnr_0 = lnsImtUp.RxInfo[0].LoRaSNR
+			lnsUp.RxInfoLat_0 = lnsImtUp.RxInfo[0].Latitude
+			lnsUp.RxInfoLon_0 = lnsImtUp.RxInfo[0].Longitude
+			lnsUp.RxInfoAlt_0 = lnsImtUp.RxInfo[0].Altitude
+			lnsUp.TxInfoFrequency = lnsImtUp.TxInfo.Frequency / 1000000
+			lnsUp.TxInfoModulation = lnsImtUp.TxInfo.DataRate.Modulation
+			lnsUp.TxInfoBandWidth = lnsImtUp.TxInfo.DataRate.Bandwidth
+			lnsUp.TxInfoSpreadFactor = lnsImtUp.TxInfo.DataRate.SpreadFactor
+			// lnsUp.TxInfoCodeRate = lnsImtUp.TxInfo.CodeRate
+			lnsUp.FCnt = lnsImtUp.FCnt
+			lnsUp.FPort = lnsImtUp.FPort
+			lnsUp.FType = "uplink"
+			lnsUp.Data = lnsImtUp.Data
+		}
+
+		// if direction == "down" {
+		// 	json.Unmarshal([]byte(message), &lnsDown)
+		// 	lnsImtDown.Reference = lnsDown.Reference
+		// 	lnsImtDown.Confirmed = lnsDown.Confirmed
+		// 	lnsImtDown.FPort = lnsDown.FPort
+		// 	lnsImtDown.Data = lnsDown.Data
+		// }
 
 	case "chirpstackv4":
-		json.Unmarshal([]byte(message), &lnsChirpStackV4)
-		// fmt.Printf("\nmessage from chirpstackv4 parseLns %s", message)
+		if direction == "up" {
+			json.Unmarshal([]byte(message), &lnsChirpStackV4Up)
+			// fmt.Printf("\nmessage from chirpstackv4 parseLns %s", message)
 
-		lns.Measurement = measurement
-		lns.DeviceId = lnsChirpStackV4.DeviceInfo.DevEui
-		lns.RxInfoMac_0 = lnsChirpStackV4.RxInfo[0].GatewayId
-		lns.RxInfoTime_0 = lnsChirpStackV4.RxInfo[0].NsTime.UnixNano()
-		lns.RxInfoRssi_0 = lnsChirpStackV4.RxInfo[0].Rssi
-		lns.RxInfoSnr_0 = lnsChirpStackV4.RxInfo[0].Snr
-		lns.RxInfoLat_0 = lnsChirpStackV4.RxInfo[0].Location.Latitude
-		lns.RxInfoLon_0 = lnsChirpStackV4.RxInfo[0].Location.Longitude
-		lns.RxInfoAlt_0 = lnsChirpStackV4.RxInfo[0].Location.Altitude
-		lns.TxInfoFrequency = lnsChirpStackV4.TxInfo.Frequency / 1000000
-		lns.TxInfoModulation = "LORA"
-		lns.TxInfoBandWidth = lnsChirpStackV4.TxInfo.Modulation.Lora.Bandwidth / 1000
-		lns.TxInfoSpreadFactor = lnsChirpStackV4.TxInfo.Modulation.Lora.SpreadingFactor
-		// lns.TxInfoCodeRate = lnsChirpStackV4.TxInfo.Modulation.Lora.CodeRate
-		lns.FCnt = lnsChirpStackV4.FCnt
-		lns.FPort = lnsChirpStackV4.FPort
-		lns.FType = "uplink"
-		lns.Data = lnsChirpStackV4.Data
-		// fmt.Printf("\nlns.Data %s", lns.Data)
+			lnsUp.Measurement = measurement
+			lnsUp.DeviceId = lnsChirpStackV4Up.DeviceInfo.DevEui
+			lnsUp.RxInfoMac_0 = lnsChirpStackV4Up.RxInfo[0].GatewayId
+			lnsUp.RxInfoTime_0 = lnsChirpStackV4Up.RxInfo[0].NsTime.UnixNano()
+			lnsUp.RxInfoRssi_0 = lnsChirpStackV4Up.RxInfo[0].Rssi
+			lnsUp.RxInfoSnr_0 = lnsChirpStackV4Up.RxInfo[0].Snr
+			lnsUp.RxInfoLat_0 = lnsChirpStackV4Up.RxInfo[0].Location.Latitude
+			lnsUp.RxInfoLon_0 = lnsChirpStackV4Up.RxInfo[0].Location.Longitude
+			lnsUp.RxInfoAlt_0 = lnsChirpStackV4Up.RxInfo[0].Location.Altitude
+			lnsUp.TxInfoFrequency = lnsChirpStackV4Up.TxInfo.Frequency / 1000000
+			lnsUp.TxInfoModulation = "LORA"
+			lnsUp.TxInfoBandWidth = lnsChirpStackV4Up.TxInfo.Modulation.Lora.Bandwidth / 1000
+			lnsUp.TxInfoSpreadFactor = lnsChirpStackV4Up.TxInfo.Modulation.Lora.SpreadingFactor
+			// lnsUp.TxInfoCodeRate = lnsChirpStackV4Up.TxInfo.Modulation.Lora.CodeRate
+			lnsUp.FCnt = lnsChirpStackV4Up.FCnt
+			lnsUp.FPort = lnsChirpStackV4Up.FPort
+			lnsUp.FType = "uplink"
+			lnsUp.Data = lnsChirpStackV4Up.Data
+			// fmt.Printf("\nlnsUp.Data %s", lnsUp.Data)
+		}
+
+		// if direction == "down" {
+		// 	json.Unmarshal([]byte(message), &lnsDown)
+		// 	lnsChirpstackV4Down.DeviceId = lnsDown.DeviceId
+		// 	lnsChirpstackV4Down.Confirmed = lnsDown.Confirmed
+		// 	lnsChirpstackV4Down.FPort = lnsDown.FPort
+		// 	lnsChirpstackV4Down.Data = lnsDown.Data
+		// }
 
 	case "atc":
 		// lns.Measurement = measurement
@@ -1240,7 +1289,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 
 	if direction == "up" {
 		// Measurement
-		sb.WriteString(lns.Measurement)
+		sb.WriteString(lnsUp.Measurement)
 
 		// Tags
 		sb.WriteString(`,deviceType=LNS`)
@@ -1252,55 +1301,88 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(etc)
 
 		sb.WriteString(`,type=`)
-		sb.WriteString(lns.FType)
+		sb.WriteString(lnsUp.FType)
 		sb.WriteString(`,rxMac_0=`)
-		sb.WriteString(lns.RxInfoMac_0)
+		sb.WriteString(lnsUp.RxInfoMac_0)
 		sb.WriteString(`,txModulation=`)
-		sb.WriteString(lns.TxInfoModulation)
+		sb.WriteString(lnsUp.TxInfoModulation)
+		sb.WriteString(`,fPort=`)
+		sb.WriteString(strconv.FormatUint(uint64(lnsUp.FPort), 10))
 		// sb.WriteString(`,txCodeRate=`)
 		// sb.WriteString(lns.TxInfoCodeRate)
 
 		// Fields
 		sb.WriteString(` `)
 		sb.WriteString(`txFrequency=`)
-		sb.WriteString(strconv.FormatFloat(lns.TxInfoFrequency, 'f', -1, 64))
+		sb.WriteString(strconv.FormatFloat(lnsUp.TxInfoFrequency, 'f', -1, 64))
 		sb.WriteString(`,txBandWidth=`)
-		sb.WriteString(strconv.FormatUint(uint64(lns.TxInfoBandWidth), 10))
+		sb.WriteString(strconv.FormatUint(uint64(lnsUp.TxInfoBandWidth), 10))
 		sb.WriteString(`,txSpreadFactor=`)
-		sb.WriteString(strconv.FormatUint(uint64(lns.TxInfoSpreadFactor), 10))
+		sb.WriteString(strconv.FormatUint(uint64(lnsUp.TxInfoSpreadFactor), 10))
 		sb.WriteString(`,rxRssi_0=`)
-		sb.WriteString(strconv.FormatInt(int64(lns.RxInfoRssi_0), 10))
+		sb.WriteString(strconv.FormatInt(int64(lnsUp.RxInfoRssi_0), 10))
 		sb.WriteString(`,rxSnr_0=`)
-		sb.WriteString(strconv.FormatFloat(lns.RxInfoSnr_0, 'f', -1, 64))
+		sb.WriteString(strconv.FormatFloat(lnsUp.RxInfoSnr_0, 'f', -1, 64))
 		sb.WriteString(`,rxLat_0=`)
-		sb.WriteString(strconv.FormatFloat(lns.RxInfoLat_0, 'f', -1, 64))
+		sb.WriteString(strconv.FormatFloat(lnsUp.RxInfoLat_0, 'f', -1, 64))
 		sb.WriteString(`,rxLon_0=`)
-		sb.WriteString(strconv.FormatFloat(lns.RxInfoLon_0, 'f', -1, 64))
+		sb.WriteString(strconv.FormatFloat(lnsUp.RxInfoLon_0, 'f', -1, 64))
 		sb.WriteString(`,rxAlt_0=`)
-		sb.WriteString(strconv.FormatUint(uint64(lns.RxInfoAlt_0), 10))
-		sb.WriteString(`,fPort=`)
-		sb.WriteString(strconv.FormatUint(uint64(lns.FPort), 10))
+		sb.WriteString(strconv.FormatUint(uint64(lnsUp.RxInfoAlt_0), 10))
 		sb.WriteString(`,fCnt=`)
-		sb.WriteString(strconv.FormatUint(uint64(lns.FCnt), 10))
+		sb.WriteString(strconv.FormatUint(uint64(lnsUp.FCnt), 10))
 		sb.WriteString(`,data="`)
-		sb.WriteString(lns.Data)
+		sb.WriteString(lnsUp.Data)
 		sb.WriteString(`"`)
 
-		sb.WriteString(parseLnsMeasurement(lns.Measurement, lns.Data, lns.FPort))
+		sb.WriteString(parseLnsMeasurement(lnsUp.Measurement, lnsUp.Data, lnsUp.FPort))
 
 		// Timestamp_ms
 		sb.WriteString(` `)
-		sb.WriteString(strconv.FormatInt(int64(lns.RxInfoTime_0), 10))
+		sb.WriteString(strconv.FormatInt(int64(lnsUp.RxInfoTime_0), 10))
 	}
 	// fmt.Printf("\n\nChirpstack %s\n\n", sb.String())
+
+	if direction == "down" {
+		json.Unmarshal([]byte(message), &lnsDown)
+
+		// Measurement
+		sb.WriteString(measurement)
+
+		// Tags
+		sb.WriteString(`,deviceType=LNS`)
+		sb.WriteString(`,direction=`)
+		sb.WriteString(direction)
+		sb.WriteString(`,origin=`)
+		sb.WriteString(etc)
+		sb.WriteString(`,deviceId=`)
+		sb.WriteString(deviceId)
+
+		sb.WriteString(`,reference=`)
+		sb.WriteString(lnsDown.Reference)
+		sb.WriteString(`,confirmed=`)
+		sb.WriteString(strconv.FormatBool(lnsDown.Confirmed))
+		sb.WriteString(`,fPort=`)
+		sb.WriteString(strconv.FormatUint(uint64(lnsDown.FPort), 10))
+
+		// Fields
+		sb.WriteString(` `)
+		sb.WriteString(`data="`)
+		sb.WriteString(lnsDown.Data)
+		sb.WriteString(`"`)
+
+		// Timestamp_ms
+		sb.WriteString(` `)
+		sb.WriteString(strconv.FormatUint(uint64(lnsDown.Timestamp), 10))
+	}
 	return sb.String()
 }
 
 // func parseEvse(deviceId string, direction string, etc string, message string) string {
 // 	var s string
-
 //		return s
 //	}
+
 func connLostHandler(c MQTT.Client, err error) {
 	fmt.Printf("Connection lost, reason: %v\n", err)
 	os.Exit(1)
