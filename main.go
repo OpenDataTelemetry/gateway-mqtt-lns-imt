@@ -1332,7 +1332,6 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(`,fCnt=`)
 		sb.WriteString(strconv.FormatUint(uint64(lnsUp.FCnt), 10))
 		sb.WriteString(`,data="`)
-		sb.WriteString(`,data=`)
 		sb.WriteString(lnsUp.Data)
 		sb.WriteString(`"`)
 
