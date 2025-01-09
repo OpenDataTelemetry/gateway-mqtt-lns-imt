@@ -1331,7 +1331,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		json.Unmarshal([]byte(message), &lnsDown)
 
 		// Measurement
-		sb.WriteString(measurement)
+		sb.WriteString("LnsDownlink")
 
 		// Tags
 		sb.WriteString(`,deviceType=LNS`)
@@ -1344,9 +1344,9 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 
 		sb.WriteString(`,reference=`)
 		sb.WriteString(lnsDown.Reference)
-		sb.WriteString(`,confirmed="`)
+		sb.WriteString(`,confirmed=`)
 		sb.WriteString(strconv.FormatBool(lnsDown.Confirmed))
-		sb.WriteString(`"`)
+		sb.WriteString(``)
 
 		// Fields
 		sb.WriteString(` `)
