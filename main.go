@@ -1331,9 +1331,10 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(strconv.FormatUint(uint64(lnsUp.FPort), 10))
 		sb.WriteString(`,fCnt=`)
 		sb.WriteString(strconv.FormatUint(uint64(lnsUp.FCnt), 10))
-		sb.WriteString(`,data="`)
+		// sb.WriteString(`,data="`)
+		sb.WriteString(`,data=`)
 		sb.WriteString(lnsUp.Data)
-		sb.WriteString(`"`)
+		// sb.WriteString(`"`)
 
 		sb.WriteString(parseLnsMeasurement(lnsUp.Measurement, lnsUp.Data, lnsUp.FPort))
 
@@ -1365,11 +1366,11 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 
 		// Fields
 		sb.WriteString(` `)
-		sb.WriteString(`data="`)
-		sb.WriteString(lnsDown.Data)
 		sb.WriteString(`,fPort=`)
 		sb.WriteString(strconv.FormatUint(uint64(lnsDown.FPort), 10))
-		sb.WriteString(`"`)
+		sb.WriteString(`data=`)
+		sb.WriteString(lnsDown.Data)
+		// sb.WriteString(`"`)
 
 		// Timestamp_ms
 		sb.WriteString(` `)
