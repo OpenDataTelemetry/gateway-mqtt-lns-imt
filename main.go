@@ -1350,7 +1350,9 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 
 		// Fields
 		sb.WriteString(` `)
-		sb.WriteString(`fPort=`)
+		sb.WriteString(`confirmed=`)
+		sb.WriteString(strconv.FormatBool(lnsDown.Confirmed))
+		sb.WriteString(`,fPort=`)
 		sb.WriteString(strconv.FormatUint(uint64(lnsDown.FPort), 10))
 		sb.WriteString(`,data="`)
 		sb.WriteString(lnsDown.Data)
