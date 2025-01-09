@@ -50,7 +50,7 @@ type LnsDown struct {
 	Confirmed   bool
 	FPort       uint64
 	Data        string
-	Timestamp   uint64
+	Timestamp   int64
 	// Object any
 }
 
@@ -1220,14 +1220,6 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 			lnsUp.Data = lnsImtUp.Data
 		}
 
-		// if direction == "down" {
-		// 	json.Unmarshal([]byte(message), &lnsDown)
-		// 	lnsImtDown.Reference = lnsDown.Reference
-		// 	lnsImtDown.Confirmed = lnsDown.Confirmed
-		// 	lnsImtDown.FPort = lnsDown.FPort
-		// 	lnsImtDown.Data = lnsDown.Data
-		// }
-
 	case "chirpstackv4":
 		if direction == "up" {
 			json.Unmarshal([]byte(message), &lnsChirpStackV4Up)
@@ -1253,14 +1245,6 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 			lnsUp.Data = lnsChirpStackV4Up.Data
 			// fmt.Printf("\nlnsUp.Data %s", lnsUp.Data)
 		}
-
-		// if direction == "down" {
-		// 	json.Unmarshal([]byte(message), &lnsDown)
-		// 	lnsChirpstackV4Down.DeviceId = lnsDown.DeviceId
-		// 	lnsChirpstackV4Down.Confirmed = lnsDown.Confirmed
-		// 	lnsChirpstackV4Down.FPort = lnsDown.FPort
-		// 	lnsChirpstackV4Down.Data = lnsDown.Data
-		// }
 
 	case "atc":
 		// lns.Measurement = measurement
@@ -1351,12 +1335,12 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 
 		// Tags
 		sb.WriteString(`,deviceType=LNS`)
+		sb.WriteString(`,deviceId=`)
+		sb.WriteString(deviceId)
 		sb.WriteString(`,direction=`)
 		sb.WriteString(direction)
 		sb.WriteString(`,origin=`)
 		sb.WriteString(etc)
-		sb.WriteString(`,deviceId=`)
-		sb.WriteString(deviceId)
 
 		sb.WriteString(`,reference=`)
 		sb.WriteString(lnsDown.Reference)
@@ -1373,7 +1357,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 
 		// Timestamp_ms
 		sb.WriteString(` `)
-		sb.WriteString(strconv.FormatUint(uint64(lnsDown.Timestamp), 10))
+		sb.WriteString(strconv.FormatInt(int64(lnsDown.Timestamp), 10))
 	}
 	return sb.String()
 }
@@ -1484,6 +1468,8 @@ func main() {
 		// 2. Process
 		// 2.1. Process Topic
 		s := strings.Split(incoming[0], "/")
+		// OpenDataTelemetry/IMT/LNS/MEASUREMENT/DEVICE_ID/up/imt
+		// OpenDataTelemetry/IMT/LNS/MEASUREMENT/DEVICE_ID/down/chirpstackv4
 		measurement := s[3]
 		deviceId := s[4]
 		direction := s[5]
