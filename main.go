@@ -45,6 +45,7 @@ type LnsUp struct {
 
 type LnsDown struct {
 	Measurement string
+	Application string
 	Reference   string
 	DeviceId    string
 	Confirmed   bool
@@ -1331,7 +1332,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		json.Unmarshal([]byte(message), &lnsDown)
 
 		// Measurement
-		sb.WriteString("LnsDownlink")
+		sb.WriteString(measurement)
 
 		// Tags
 		sb.WriteString(`,deviceType=LNS`)
@@ -1342,6 +1343,8 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(`,origin=`)
 		sb.WriteString(etc)
 
+		sb.WriteString(`,application=`)
+		sb.WriteString(lnsDown.Application)
 		sb.WriteString(`,reference=`)
 		sb.WriteString(lnsDown.Reference)
 
