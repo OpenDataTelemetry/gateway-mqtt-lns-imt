@@ -202,6 +202,13 @@ type Sprinkler struct {
 	BoardVoltage float64 `json:"boardVoltage"`
 }
 
+type SoilMoisture3DepthLevels struct {
+	SoilMoistureDepthLevel1 uint64  `json:"soilMoistureDepthLevel1"`
+	SoilMoistureDepthLevel2 uint64  `json:"soilMoistureDepthLevel2"`
+	SoilMoistureDepthLevel3 uint64  `json:"soilMoistureDepthLevel3"`
+	BoardVoltage            float64 `json:"boardVoltage"`
+}
+
 type LnsChirpStackV4Up struct {
 	DeduplicationId string                      `json:"deduplicationId"`
 	DeviceInfo      LnsChirpStackV4UpDeviceInfo `json:"deviceInfo"`
@@ -1103,6 +1110,22 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 			sb.WriteString(strconv.FormatUint(uint64(sprinkler.Counter), 10))
 			sb.WriteString(`,boardVoltage=`)
 			sb.WriteString(strconv.FormatFloat(sprinkler.BoardVoltage, 'f', -1, 64))
+
+		case "SoilMoisture3DepthLevels":
+			var soilMoisture3DepthLevels SoilMoisture3DepthLevels
+			soilMoisture3DepthLevels.SoilMoistureDepthLevel1 = port100.X_0D_0
+			soilMoisture3DepthLevels.SoilMoistureDepthLevel2 = port100.X_0D_1
+			soilMoisture3DepthLevels.SoilMoistureDepthLevel3 = port100.X_0D_2
+			soilMoisture3DepthLevels.BoardVoltage = port100.X_0C
+
+			sb.WriteString(`,soilMoistureDepthLevel1=`)
+			sb.WriteString(strconv.FormatUint(uint64(soilMoisture3DepthLevels.SoilMoistureDepthLevel1), 10))
+			sb.WriteString(`,soilMoistureDepthLevel2=`)
+			sb.WriteString(strconv.FormatUint(uint64(soilMoisture3DepthLevels.SoilMoistureDepthLevel2), 10))
+			sb.WriteString(`,soilMoistureDepthLevel3=`)
+			sb.WriteString(strconv.FormatUint(uint64(soilMoisture3DepthLevels.SoilMoistureDepthLevel3), 10))
+			sb.WriteString(`,boardVoltage=`)
+			sb.WriteString(strconv.FormatFloat(soilMoisture3DepthLevels.BoardVoltage, 'f', -1, 64))
 
 		default:
 		}
