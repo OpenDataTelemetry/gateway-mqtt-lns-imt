@@ -194,6 +194,14 @@ type EnergyMeter struct {
 	BoardVoltage  float64 `json:"boardVoltage"`
 }
 
+type Sprinkler struct {
+	Solenoid1    bool    `json:"solenoid1"`
+	Solenoid2    bool    `json:"solenoid2"`
+	Solenoid3    bool    `json:"solenoid3"`
+	Counter      uint64  `json:"counter"`
+	BoardVoltage float64 `json:"boardVoltage"`
+}
+
 type LnsChirpStackV4Up struct {
 	DeduplicationId string                      `json:"deduplicationId"`
 	DeviceInfo      LnsChirpStackV4UpDeviceInfo `json:"deviceInfo"`
@@ -1057,6 +1065,44 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 			sb.WriteString(strconv.FormatFloat(energyMeter.ReverseEnergy, 'f', -1, 64))
 			sb.WriteString(`,boardVoltage=`)
 			sb.WriteString(strconv.FormatFloat(energyMeter.BoardVoltage, 'f', -1, 64))
+
+		case "Sprinkler":
+			var sprinkler Sprinkler
+			solenoid1 := port100.X_0D_0
+			solenoid2 := port100.X_0D_1
+			solenoid3 := port100.X_0D_2
+
+			if solenoid1 > 1500 {
+				sprinkler.Solenoid1 = true
+			} else {
+				sprinkler.Solenoid1 = false
+			}
+
+			if solenoid2 > 1500 {
+				sprinkler.Solenoid2 = true
+			} else {
+				sprinkler.Solenoid2 = false
+			}
+
+			if solenoid3 > 1500 {
+				sprinkler.Solenoid3 = true
+			} else {
+				sprinkler.Solenoid3 = false
+			}
+
+			sprinkler.Counter = port100.X_0B
+			sprinkler.BoardVoltage = port100.X_0C
+
+			sb.WriteString(`,solenoid1=`)
+			sb.WriteString(strconv.FormatBool(sprinkler.Solenoid1))
+			sb.WriteString(`,solenoid2=`)
+			sb.WriteString(strconv.FormatBool(sprinkler.Solenoid2))
+			sb.WriteString(`,solenoid3=`)
+			sb.WriteString(strconv.FormatBool(sprinkler.Solenoid3))
+			sb.WriteString(`,counter=`)
+			sb.WriteString(strconv.FormatUint(uint64(sprinkler.Counter), 10))
+			sb.WriteString(`,boardVoltage=`)
+			sb.WriteString(strconv.FormatFloat(sprinkler.BoardVoltage, 'f', -1, 64))
 
 		default:
 		}
