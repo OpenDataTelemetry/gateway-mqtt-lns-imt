@@ -1407,6 +1407,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(`,deviceType=LNS`)
 		sb.WriteString(`,deviceId=`)
 		sb.WriteString(deviceId)
+		sb.WriteString(`,type=downlink`)
 		sb.WriteString(`,direction=`)
 		sb.WriteString(direction)
 		sb.WriteString(`,origin=`)
