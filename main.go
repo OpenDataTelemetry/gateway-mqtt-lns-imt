@@ -1113,9 +1113,9 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 
 		case "SoilMoisture3DepthLevels":
 			var soilMoisture3DepthLevels SoilMoisture3DepthLevels
-			soilMoisture3DepthLevels.SoilMoistureDepthLevel1 = port100.X_0D_0
+			soilMoisture3DepthLevels.SoilMoistureDepthLevel1 = port100.X_0D_2
 			soilMoisture3DepthLevels.SoilMoistureDepthLevel2 = port100.X_0D_1
-			soilMoisture3DepthLevels.SoilMoistureDepthLevel3 = port100.X_0D_2
+			soilMoisture3DepthLevels.SoilMoistureDepthLevel3 = port100.X_0D_0
 			soilMoisture3DepthLevels.BoardVoltage = port100.X_0C
 
 			sb.WriteString(`,soilMoistureDepthLevel1=`)
