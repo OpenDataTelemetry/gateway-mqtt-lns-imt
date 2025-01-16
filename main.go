@@ -43,6 +43,44 @@ type LnsUp struct {
 	Data  string `json:"data"`
 }
 
+type EvseUp struct {
+	FeatureName   string `json:"featureName"`
+	DeviceId      string `json:"deviceId"`
+	DeviceType    string `json:"deviceType"`
+	ConnectorId   string `json:"ConnectorId"`
+	ChargePointId string `json:"chargePointId"`
+	Unit          string `json:"unit"`
+	Format        string `json:"format"`
+	Measurand     string `json:"measurand"`
+	Context       string `json:"context"`
+	Location      string `json:"location"`
+	Timestamp     int64  `json:"timestamp"`
+}
+
+type EvseMeterValue struct {
+	ForwardEnergy float64 `json:"forwardEnergy"`
+}
+
+type EvseStatusNotification struct {
+	Status          string `json:"status"`
+	ErrorCode       string `json:"errorCode"`
+	Info            string `json:"info"`
+	VendorId        string `json:"vendorId"`
+	VendorErrorCode string `json:"vendorErrorCode"`
+}
+
+type EvseStartTransaction struct {
+	StartMeter    int64  `json:"startMeter"`
+	TransactionId string `json:"transactionId"`
+	StartTime     int64  `json:"startTime"`
+	IdTag         string `json:"idTag"`
+}
+
+type EvseStopTransaction struct {
+	TransactionId string `json:"transactionId"`
+	MeterStop     int64  `json:"meterStop"`
+	StopTime      int64  `json:"stopTime"`
+}
 type LnsDown struct {
 	Measurement string
 	Application string
@@ -69,8 +107,7 @@ type LnsChirpstackV4Down struct {
 	Data      string
 	// Object any
 }
-type Evse struct {
-}
+
 type Port100 struct {
 	X_01   float64 `json:"01"`
 	X_02   float64 `json:"02"`
@@ -1435,6 +1472,121 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 	return sb.String()
 }
 
+func parseEvseMeasurement(measurement string, data string) string {
+	var sb strings.Builder
+
+	if data == "" {
+		return "No data"
+	}
+
+	switch measurement {
+	case "EvseMeterValues":
+		var evseMeterValue EvseMeterValue
+		json.Unmarshal([]byte(data), &evseMeterValue)
+
+		forwardEnergy := evseMeterValue.ForwardEnergy * 0.001
+
+		sb.WriteString(`forwardEnergy=`)
+		sb.WriteString(strconv.FormatFloat(forwardEnergy, 'f', -1, 64))
+
+	case "EvseStatusNotification":
+		var evseStatusNotification EvseStatusNotification
+		json.Unmarshal([]byte(data), &evseStatusNotification)
+
+		sb.WriteString(`status=`)
+		sb.WriteString(evseStatusNotification.Status)
+		sb.WriteString(`,errorCode=`)
+		sb.WriteString(evseStatusNotification.ErrorCode)
+		sb.WriteString(`,info=`)
+		sb.WriteString(evseStatusNotification.Info)
+		sb.WriteString(`,vendorId=`)
+		sb.WriteString(evseStatusNotification.VendorId)
+		sb.WriteString(`,vendorErrorCode=`)
+		sb.WriteString(evseStatusNotification.VendorErrorCode)
+
+	case "EvseStartTransaction":
+		var evseStartTransaction EvseStartTransaction
+		json.Unmarshal([]byte(data), &evseStartTransaction)
+
+		sb.WriteString(`transactionId=`)
+		sb.WriteString(evseStartTransaction.TransactionId)
+		sb.WriteString(`,startMeter=`)
+		sb.WriteString(strconv.FormatInt(evseStartTransaction.StartMeter, 10))
+		sb.WriteString(`,startTime=`)
+		sb.WriteString(strconv.FormatInt(evseStartTransaction.StartTime, 10))
+		sb.WriteString(`,idTag=`)
+		sb.WriteString(evseStartTransaction.IdTag)
+
+	case "EvseStopTransaction":
+		var evseStopTransaction EvseStopTransaction
+		json.Unmarshal([]byte(data), &evseStopTransaction)
+
+		sb.WriteString(`transactionId=`)
+		sb.WriteString(evseStopTransaction.TransactionId)
+		sb.WriteString(`,meterStop=`)
+		sb.WriteString(strconv.FormatInt(evseStopTransaction.MeterStop, 10))
+		sb.WriteString(`,stopTime=`)
+		sb.WriteString(strconv.FormatInt(evseStopTransaction.StopTime, 10))
+	}
+
+	return sb.String()
+}
+
+func parseEvse(featureName string, deviceType string, deviceId string, direction string, etc string, message string) string {
+	var sb strings.Builder
+	var evseUp EvseUp
+
+	if message == "" {
+		return "No message to parse"
+	}
+
+	if direction == "up" {
+		var measurement strings.Builder
+
+		json.Unmarshal([]byte(message), &evseUp)
+		measurement.WriteString("Evse")
+		measurement.WriteString(featureName)
+		// Measurement
+		sb.WriteString(measurement.String())
+
+		// Tags
+		sb.WriteString(`,deviceId=`)
+		sb.WriteString(evseUp.DeviceId)
+		sb.WriteString(`,deviceType=`)
+		sb.WriteString(deviceType)
+		sb.WriteString(`,connectorId="`)
+		sb.WriteString(evseUp.ConnectorId)
+		sb.WriteString(`",chargePointId=`)
+		sb.WriteString(evseUp.ChargePointId)
+		// sb.WriteString(`,unit=`)
+		// sb.WriteString(evseUp.Unit)
+		// sb.WriteString(`,format=`)
+		// sb.WriteString(evseUp.Format)
+		// sb.WriteString(`,measurand=`)
+		// sb.WriteString(evseUp.Measurand)
+		// sb.WriteString(`,context=`)
+		// sb.WriteString(evseUp.Context)
+		// sb.WriteString(`,location=`)
+		// sb.WriteString(evseUp.Location)
+
+		sb.WriteString(`,direction=`)
+		sb.WriteString(direction)
+		sb.WriteString(`,origin=`)
+		sb.WriteString(etc)
+
+		// Fields
+		// sb.WriteString(`,fowardEnergy=`)
+		// sb.WriteString(strconv.FormatUint(evseUp.FowardEnergy, 10))
+		sb.WriteString(` `)
+		sb.WriteString(parseEvseMeasurement(measurement.String(), message))
+
+		// Timestamp_ns
+		sb.WriteString(` `)
+		sb.WriteString(strconv.FormatInt(evseUp.Timestamp, 10))
+	}
+	return sb.String()
+}
+
 // func parseEvse(deviceId string, direction string, etc string, message string) string {
 // 	var s string
 //		return s
@@ -1448,7 +1600,7 @@ func connLostHandler(c MQTT.Client, err error) {
 func main() {
 	id := uuid.New().String()
 	ORGANIZATION := os.Getenv("ORGANIZATION")
-	DEVICE_TYPE := os.Getenv("DEVICE_TYPE")
+	// DEVICE_TYPE := os.Getenv("DEVICE_TYPE")
 	BUCKET := os.Getenv("BUCKET")
 	MQTT_BROKER := os.Getenv("MQTT_BROKER")
 	kafkaBroker := os.Getenv("KAFKA_BROKER")
@@ -1463,9 +1615,9 @@ func main() {
 	// sbMqttSubTopic.WriteString("debug/OpenDataTelemetry/")
 	sbMqttSubTopic.WriteString("OpenDataTelemetry/")
 	sbMqttSubTopic.WriteString(ORGANIZATION)
-	sbMqttSubTopic.WriteString("/")
-	sbMqttSubTopic.WriteString(DEVICE_TYPE)
-	sbMqttSubTopic.WriteString("/+/+/+/+")
+	// sbMqttSubTopic.WriteString("/")
+	// sbMqttSubTopic.WriteString(DEVICE_TYPE)
+	sbMqttSubTopic.WriteString("/+/+/+/+/+")
 	// sbMqttSubTopic.WriteString("/+/+/+")
 
 	// KafkaProducerClient
@@ -1543,6 +1695,7 @@ func main() {
 		s := strings.Split(incoming[0], "/")
 		// OpenDataTelemetry/IMT/LNS/MEASUREMENT/DEVICE_ID/up/imt
 		// OpenDataTelemetry/IMT/LNS/MEASUREMENT/DEVICE_ID/down/chirpstackv4
+		deviceType := s[2]
 		measurement := s[3]
 		deviceId := s[4]
 		direction := s[5]
@@ -1570,17 +1723,19 @@ func main() {
 
 		if ORGANIZATION == "IMT" {
 
-			switch DEVICE_TYPE {
+			switch deviceType {
 			case "LNS":
 				// var influx Influx
 				kafkaMessage = parseLns(measurement, deviceId, direction, etc, incoming[1])
-				fmt.Printf("\nMessage: %s", kafkaMessage)
+				// fmt.Printf("\nMessage: %s", kafkaMessage)
 
 			case "EVSE":
-				// kafkaMessage = parseEvse(deviceId, direction, etc, incoming[1])
+				kafkaMessage = parseEvse(measurement, deviceType, deviceId, direction, etc, incoming[1])
 
 			default:
 			}
+			fmt.Printf("\nMessage: %s", kafkaMessage)
+
 		}
 
 		// return influx line protocol
