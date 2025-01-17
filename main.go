@@ -1548,7 +1548,7 @@ func parseEvseMeasurement(measurement string, data string) string {
 	}
 
 	switch measurement {
-	case "EvseMeterValues":
+	case "MeterValues":
 		var evseMeterValue EvseMeterValue
 		json.Unmarshal([]byte(data), &evseMeterValue)
 
@@ -1558,7 +1558,7 @@ func parseEvseMeasurement(measurement string, data string) string {
 		sb.WriteString(`forwardEnergy=`)
 		sb.WriteString(strconv.FormatFloat(forwardEnergy, 'f', -1, 64))
 
-	case "EvseStatusNotification":
+	case "StatusNotification":
 		var evseStatusNotification EvseStatusNotification
 		json.Unmarshal([]byte(data), &evseStatusNotification)
 
@@ -1574,7 +1574,7 @@ func parseEvseMeasurement(measurement string, data string) string {
 		sb.WriteString(`,vendorErrorCode=`)
 		sb.WriteString(evseStatusNotification.VendorErrorCode)
 
-	case "EvseStartTransaction":
+	case "StartTransaction":
 		var evseStartTransaction EvseStartTransaction
 		json.Unmarshal([]byte(data), &evseStartTransaction)
 
@@ -1588,7 +1588,7 @@ func parseEvseMeasurement(measurement string, data string) string {
 		sb.WriteString(`,idTag=`)
 		sb.WriteString(evseStartTransaction.IdTag)
 
-	case "EvseStopTransaction":
+	case "StopTransaction":
 		var evseStopTransaction EvseStopTransaction
 		json.Unmarshal([]byte(data), &evseStopTransaction)
 
