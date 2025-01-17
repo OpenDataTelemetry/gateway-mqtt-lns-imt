@@ -49,6 +49,35 @@ type LnsAlert struct {
 	Timestamp int64  `json:"timestamp"`
 }
 
+type HealthPackUp struct {
+	Measurement string `json:"measurement"`
+	DeviceId    string `json:"deviceId"`
+	DeviceType  string `json:"deviceType"`
+	Data        string `json:"data"`
+	Timestamp   int64  `json:"timestamp"`
+}
+
+type HealthPackVital struct {
+	BowlTemperature1    float64 `json:"bowlTemperature1"`
+	ExternalTemperature float64 `json:"externalTemperature"`
+	Latitude            float64 `json:"latitude"`
+	Longitude           float64 `json:"longitude"`
+	Altitude            float64 `json:"altitude"`
+	PidEffort           float64 `json:"pidEffort"`
+	MachineStatus       string  `json:"machineStatus"`
+}
+
+type NspiUp struct {
+	Measurement string `json:"measurement"`
+	DeviceId    string `json:"deviceId"`
+	DeviceType  string `json:"deviceType"`
+	Data        string `json:"data"`
+	Timestamp   int64  `json:"timestamp"`
+}
+
+type NspiGenericJson struct {
+	Data string `json:"data"`
+}
 type EvseUp struct {
 	FeatureName   string `json:"featureName"`
 	DeviceId      string `json:"deviceId"`
@@ -87,7 +116,7 @@ type EvseStopTransaction struct {
 	MeterStop     int64  `json:"meterStop"`
 	StopTime      int64  `json:"stopTime"`
 }
-type LnsDown struct {
+type LnsCommand struct {
 	Measurement string
 	Application string
 	Reference   string
@@ -99,14 +128,14 @@ type LnsDown struct {
 	// Object any
 }
 
-type LnsImtDown struct {
+type LnsImtCommand struct {
 	Reference string
 	Confirmed bool
 	FPort     uint64
 	Data      string
 }
 
-type LnsChirpstackV4Down struct {
+type LnsChirpstackV4Command struct {
 	DeviceId  string
 	Confirmed bool
 	FPort     uint64
@@ -1290,12 +1319,12 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 func parseLns(measurement string, deviceId string, direction string, etc string, message string) string {
 	var sb strings.Builder
 	var lnsUp LnsUp
-	var lnsDown LnsDown
+	var lnsCommand LnsCommand
 	var lnsImtUp LnsImtUp
 	var lnsAlert LnsAlert
-	// var lnsImtDown LnsImtDown
+	// var lnsImtCommand LnsImtCommand
 	var lnsChirpStackV4Up LnsChirpStackV4Up
-	// var lnsChirpstackV4Down LnsChirpstackV4Down
+	// var lnsChirpstackV4Command LnsChirpstackV4Command
 
 	// fmt.Printf("\nmeasurement %s", measurement)
 	// fmt.Printf("\ndeviceId %s", deviceId)
@@ -1398,8 +1427,8 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(`,origin=`)
 		sb.WriteString(etc)
 
-		sb.WriteString(`,type=`)
-		sb.WriteString(lnsUp.FType)
+		// sb.WriteString(`,type=`)
+		// sb.WriteString(lnsUp.FType)
 		sb.WriteString(`,rxMac_0=`)
 		sb.WriteString(lnsUp.RxInfoMac_0)
 		sb.WriteString(`,txModulation=`)
@@ -1442,54 +1471,54 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 	// fmt.Printf("\n\nChirpstack %s\n\n", sb.String())
 
 	if direction == "down" {
-		json.Unmarshal([]byte(message), &lnsDown)
+		json.Unmarshal([]byte(message), &lnsCommand)
 
 		// Measurement
-		sb.WriteString("Lns")
+		// sb.WriteString("Lns")
 		sb.WriteString(measurement)
 
 		// Tags
 		sb.WriteString(`,deviceType=LNS`)
 		sb.WriteString(`,deviceId=`)
 		sb.WriteString(deviceId)
-		sb.WriteString(`,type=downlink`)
+		// sb.WriteString(`,type=downlink`)
 		sb.WriteString(`,direction=`)
 		sb.WriteString(direction)
 		sb.WriteString(`,origin=`)
 		sb.WriteString(etc)
 
 		sb.WriteString(`,application=`)
-		sb.WriteString(lnsDown.Application)
+		sb.WriteString(lnsCommand.Application)
 		sb.WriteString(`,reference=`)
-		sb.WriteString(lnsDown.Reference)
+		sb.WriteString(lnsCommand.Reference)
 
 		// Fields
 		sb.WriteString(` `)
 		sb.WriteString(`confirmed=`)
-		sb.WriteString(strconv.FormatBool(lnsDown.Confirmed))
+		sb.WriteString(strconv.FormatBool(lnsCommand.Confirmed))
 		sb.WriteString(`,fPort=`)
-		sb.WriteString(strconv.FormatUint(uint64(lnsDown.FPort), 10))
+		sb.WriteString(strconv.FormatUint(uint64(lnsCommand.FPort), 10))
 		sb.WriteString(`,data="`)
-		sb.WriteString(lnsDown.Data)
+		sb.WriteString(lnsCommand.Data)
 		sb.WriteString(`"`)
 
 		// Timestamp_ms
 		sb.WriteString(` `)
-		sb.WriteString(strconv.FormatInt(int64(lnsDown.Timestamp), 10))
+		sb.WriteString(strconv.FormatInt(int64(lnsCommand.Timestamp), 10))
 	}
 
 	if direction == "alert" {
 		json.Unmarshal([]byte(message), &lnsAlert)
 
 		// Measurement
-		sb.WriteString("Lns")
+		// sb.WriteString("Lns")
 		sb.WriteString(measurement)
 
 		// Tags
 		sb.WriteString(`,deviceType=LNS`)
 		sb.WriteString(`,deviceId=`)
 		sb.WriteString(deviceId)
-		sb.WriteString(`,type=alert`)
+		// sb.WriteString(`,type=alert`)
 		sb.WriteString(`,direction=`)
 		sb.WriteString(direction)
 		sb.WriteString(`,origin=`)
@@ -1587,7 +1616,7 @@ func parseEvse(featureName string, deviceType string, deviceId string, direction
 		var measurement strings.Builder
 
 		json.Unmarshal([]byte(message), &evseUp)
-		measurement.WriteString("Evse")
+		// measurement.WriteString("Evse")
 		measurement.WriteString(featureName)
 		// Measurement
 		sb.WriteString(measurement.String())
@@ -1625,6 +1654,165 @@ func parseEvse(featureName string, deviceType string, deviceId string, direction
 		// Timestamp_ns
 		sb.WriteString(` `)
 		sb.WriteString(strconv.FormatInt(evseUp.Timestamp, 10))
+	}
+	return sb.String()
+}
+
+func parseHealthPackMeasurement(measurement string, data string) string {
+	var sb strings.Builder
+
+	if data == "" {
+		return "No data"
+	}
+
+	switch measurement {
+	case "Vital":
+		var healthPackVital HealthPackVital
+		json.Unmarshal([]byte(data), &healthPackVital)
+
+		sb.WriteString(`machineStatus=`)
+		sb.WriteString(healthPackVital.MachineStatus)
+
+		sb.WriteString(` `)
+		sb.WriteString(`bowlTemperature1=`)
+		sb.WriteString(strconv.FormatFloat(healthPackVital.BowlTemperature1, 'f', -1, 64))
+		sb.WriteString(`externalTemperature=`)
+		sb.WriteString(strconv.FormatFloat(healthPackVital.ExternalTemperature, 'f', -1, 64))
+		sb.WriteString(`latitude=`)
+		sb.WriteString(strconv.FormatFloat(healthPackVital.Latitude, 'f', -1, 64))
+		sb.WriteString(`longitude=`)
+		sb.WriteString(strconv.FormatFloat(healthPackVital.Longitude, 'f', -1, 64))
+		sb.WriteString(`altitude=`)
+		sb.WriteString(strconv.FormatFloat(healthPackVital.Altitude, 'f', -1, 64))
+		sb.WriteString(`pidEffort=`)
+		sb.WriteString(strconv.FormatFloat(healthPackVital.PidEffort, 'f', -1, 64))
+	}
+
+	return sb.String()
+}
+
+func parseHealthPack(featureName string, deviceType string, deviceId string, direction string, etc string, message string) string {
+	var sb strings.Builder
+	var healthPackUp HealthPackUp
+
+	if message == "" {
+		return "No message to parse"
+	}
+
+	if direction == "up" {
+		var measurement strings.Builder
+
+		json.Unmarshal([]byte(message), &healthPackUp)
+		// measurement.WriteString("Evse")
+		measurement.WriteString(featureName)
+		// Measurement
+		sb.WriteString(measurement.String())
+
+		// Tags
+		sb.WriteString(`,deviceId=`)
+		sb.WriteString(healthPackUp.DeviceId)
+		sb.WriteString(`,deviceType=`)
+		sb.WriteString(deviceType)
+
+		// sb.WriteString(`,unit=`)
+		// sb.WriteString(evseUp.Unit)
+		// sb.WriteString(`,format=`)
+		// sb.WriteString(evseUp.Format)
+		// sb.WriteString(`,measurand=`)
+		// sb.WriteString(evseUp.Measurand)
+		// sb.WriteString(`,context=`)
+		// sb.WriteString(evseUp.Context)
+		// sb.WriteString(`,location=`)
+		// sb.WriteString(evseUp.Location)
+
+		sb.WriteString(`,direction=`)
+		sb.WriteString(direction)
+		sb.WriteString(`,origin=`)
+		sb.WriteString(etc)
+
+		// Fields
+		// sb.WriteString(`,fowardEnergy=`)
+		// sb.WriteString(strconv.FormatUint(evseUp.FowardEnergy, 10))
+		sb.WriteString(parseHealthPackMeasurement(measurement.String(), message))
+
+		// Timestamp_ns
+		sb.WriteString(` `)
+		sb.WriteString(strconv.FormatInt(healthPackUp.Timestamp, 10))
+	}
+	return sb.String()
+}
+
+func parseNspiMeasurement(measurement string, data string) string {
+	var sb strings.Builder
+
+	if data == "" {
+		return "No data"
+	}
+
+	switch measurement {
+	case "GenericJson":
+		var nspiGenericJson NspiGenericJson
+		json.Unmarshal([]byte(data), &nspiGenericJson)
+
+		// TODO -> Assign strings to Tags and not strings into fields
+		sb.WriteString(` `)
+		sb.WriteString(`data=`)
+		sb.WriteString(nspiGenericJson.Data)
+	}
+
+	return sb.String()
+}
+
+func parseNspi(featureName string, deviceType string, deviceId string, direction string, etc string, message string) string {
+	var sb strings.Builder
+	var nspiUp NspiUp
+
+	if message == "" {
+		return "No message to parse"
+	}
+
+	if direction == "up" {
+		var measurement strings.Builder
+
+		json.Unmarshal([]byte(message), &nspiUp)
+		// measurement.WriteString("Evse")
+		measurement.WriteString(featureName)
+		// Measurement
+		sb.WriteString(measurement.String())
+
+		// Tags
+		sb.WriteString(`,deviceId=`)
+		sb.WriteString(nspiUp.DeviceId)
+		sb.WriteString(`,deviceType=`)
+		sb.WriteString(deviceType)
+		// sb.WriteString(`,connectorId="`)
+		// sb.WriteString(evseUp.ConnectorId)
+		// sb.WriteString(`",chargePointId=`)
+		// sb.WriteString(evseUp.ChargePointId)
+		// sb.WriteString(`,unit=`)
+		// sb.WriteString(evseUp.Unit)
+		// sb.WriteString(`,format=`)
+		// sb.WriteString(evseUp.Format)
+		// sb.WriteString(`,measurand=`)
+		// sb.WriteString(evseUp.Measurand)
+		// sb.WriteString(`,context=`)
+		// sb.WriteString(evseUp.Context)
+		// sb.WriteString(`,location=`)
+		// sb.WriteString(evseUp.Location)
+
+		sb.WriteString(`,direction=`)
+		sb.WriteString(direction)
+		sb.WriteString(`,origin=`)
+		sb.WriteString(etc)
+
+		// Fields
+		// sb.WriteString(`,fowardEnergy=`)
+		// sb.WriteString(strconv.FormatUint(evseUp.FowardEnergy, 10))
+		sb.WriteString(parseNspiMeasurement(measurement.String(), message))
+
+		// Timestamp_ns
+		sb.WriteString(` `)
+		sb.WriteString(strconv.FormatInt(nspiUp.Timestamp, 10))
 	}
 	return sb.String()
 }
@@ -1773,6 +1961,12 @@ func main() {
 
 			case "EVSE":
 				kafkaMessage = parseEvse(measurement, deviceType, deviceId, direction, etc, incoming[1])
+
+			case "HealthPack":
+				kafkaMessage = parseHealthPack(measurement, deviceType, deviceId, direction, etc, incoming[1])
+
+			case "NSPI":
+				kafkaMessage = parseNspi(measurement, deviceType, deviceId, direction, etc, incoming[1])
 
 			default:
 			}
