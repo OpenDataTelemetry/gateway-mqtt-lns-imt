@@ -1499,7 +1499,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 
 		// Fields
 		sb.WriteString(` `)
-		sb.WriteString(`,data="`)
+		sb.WriteString(`data="`)
 		sb.WriteString(lnsAlert.Data)
 		sb.WriteString(`"`)
 
