@@ -1486,6 +1486,7 @@ func parseEvseMeasurement(measurement string, data string) string {
 
 		forwardEnergy := evseMeterValue.ForwardEnergy * 0.001
 
+		sb.WriteString(` `)
 		sb.WriteString(`forwardEnergy=`)
 		sb.WriteString(strconv.FormatFloat(forwardEnergy, 'f', -1, 64))
 
@@ -1493,14 +1494,15 @@ func parseEvseMeasurement(measurement string, data string) string {
 		var evseStatusNotification EvseStatusNotification
 		json.Unmarshal([]byte(data), &evseStatusNotification)
 
-		sb.WriteString(`status=`)
+		sb.WriteString(`,status=`)
 		sb.WriteString(evseStatusNotification.Status)
-		sb.WriteString(`,errorCode=`)
+		sb.WriteString(`,vendorId=`)
+		sb.WriteString(evseStatusNotification.VendorId)
+		sb.WriteString(` `)
+		sb.WriteString(`errorCode=`)
 		sb.WriteString(evseStatusNotification.ErrorCode)
 		sb.WriteString(`,info=`)
 		sb.WriteString(evseStatusNotification.Info)
-		sb.WriteString(`,vendorId=`)
-		sb.WriteString(evseStatusNotification.VendorId)
 		sb.WriteString(`,vendorErrorCode=`)
 		sb.WriteString(evseStatusNotification.VendorErrorCode)
 
@@ -1508,6 +1510,7 @@ func parseEvseMeasurement(measurement string, data string) string {
 		var evseStartTransaction EvseStartTransaction
 		json.Unmarshal([]byte(data), &evseStartTransaction)
 
+		sb.WriteString(` `)
 		sb.WriteString(`transactionId=`)
 		sb.WriteString(evseStartTransaction.TransactionId)
 		sb.WriteString(`,startMeter=`)
@@ -1521,6 +1524,7 @@ func parseEvseMeasurement(measurement string, data string) string {
 		var evseStopTransaction EvseStopTransaction
 		json.Unmarshal([]byte(data), &evseStopTransaction)
 
+		sb.WriteString(` `)
 		sb.WriteString(`transactionId=`)
 		sb.WriteString(evseStopTransaction.TransactionId)
 		sb.WriteString(`,meterStop=`)
@@ -1577,7 +1581,6 @@ func parseEvse(featureName string, deviceType string, deviceId string, direction
 		// Fields
 		// sb.WriteString(`,fowardEnergy=`)
 		// sb.WriteString(strconv.FormatUint(evseUp.FowardEnergy, 10))
-		sb.WriteString(` `)
 		sb.WriteString(parseEvseMeasurement(measurement.String(), message))
 
 		// Timestamp_ns
