@@ -1478,7 +1478,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 	}
 
 	if direction == "alert" {
-		json.Unmarshal([]byte(message), &lnsDown)
+		json.Unmarshal([]byte(message), &lnsAlert)
 
 		// Measurement
 		sb.WriteString("Lns")
