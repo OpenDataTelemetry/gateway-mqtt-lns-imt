@@ -43,6 +43,12 @@ type LnsUp struct {
 	Data  string `json:"data"`
 }
 
+type LnsAlert struct {
+	DeviceId  string `json:"deviceId"`
+	Data      string `json:"data"`
+	Timestamp int64  `json:"timestamp"`
+}
+
 type EvseUp struct {
 	FeatureName   string `json:"featureName"`
 	DeviceId      string `json:"deviceId"`
@@ -1286,6 +1292,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 	var lnsUp LnsUp
 	var lnsDown LnsDown
 	var lnsImtUp LnsImtUp
+	var lnsAlert LnsAlert
 	// var lnsImtDown LnsImtDown
 	var lnsChirpStackV4Up LnsChirpStackV4Up
 	// var lnsChirpstackV4Down LnsChirpstackV4Down
@@ -1468,6 +1475,37 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		// Timestamp_ms
 		sb.WriteString(` `)
 		sb.WriteString(strconv.FormatInt(int64(lnsDown.Timestamp), 10))
+	}
+
+	if direction == "alert" {
+		json.Unmarshal([]byte(message), &lnsDown)
+
+		// Measurement
+		sb.WriteString("Lns")
+		sb.WriteString(measurement)
+
+		// Tags
+		sb.WriteString(`,deviceType=LNS`)
+		sb.WriteString(`,deviceId=`)
+		sb.WriteString(deviceId)
+		sb.WriteString(`,type=alert`)
+		sb.WriteString(`,direction=`)
+		sb.WriteString(direction)
+		sb.WriteString(`,origin=`)
+		sb.WriteString(etc)
+
+		sb.WriteString(`,deviceId=`)
+		sb.WriteString(lnsAlert.DeviceId)
+
+		// Fields
+		sb.WriteString(` `)
+		sb.WriteString(`,data="`)
+		sb.WriteString(lnsAlert.Data)
+		sb.WriteString(`"`)
+
+		// Timestamp_ms
+		sb.WriteString(` `)
+		sb.WriteString(strconv.FormatInt(int64(lnsAlert.Timestamp), 10))
 	}
 	return sb.String()
 }
