@@ -1445,6 +1445,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		json.Unmarshal([]byte(message), &lnsDown)
 
 		// Measurement
+		sb.WriteString("Lns")
 		sb.WriteString(measurement)
 
 		// Tags
