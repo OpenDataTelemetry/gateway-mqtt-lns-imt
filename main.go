@@ -50,21 +50,99 @@ type LnsAlert struct {
 }
 
 type HealthPackUp struct {
-	Measurement string `json:"measurement"`
-	DeviceId    string `json:"deviceId"`
-	DeviceType  string `json:"deviceType"`
-	Data        string `json:"data"`
-	Timestamp   int64  `json:"timestamp"`
+	Props HealthPackUpProps      `json:"props"`
+	Data  map[string]interface{} `json:"data"`
+	Date  string                 `json:"date"`
 }
 
-type HealthPackVital struct {
-	BowlTemperature1    float64 `json:"bowlTemperature1"`
-	ExternalTemperature float64 `json:"externalTemperature"`
-	Latitude            float64 `json:"latitude"`
-	Longitude           float64 `json:"longitude"`
-	Altitude            float64 `json:"altitude"`
-	PidEffort           float64 `json:"pidEffort"`
-	MachineStatus       string  `json:"machineStatus"`
+type HealthPackUpProps struct {
+	DeviceName string `json:"deviceName"`
+	MacAddress string `json:"macAddress"`
+	DeviceIp   string `json:"deviceIp"`
+}
+
+type HealthPackInertias struct {
+	FAccX        string `json:"fAccX"`        // :"0.0"
+	FAccY        string `json:"fAccY"`        // :"0.0"
+	FAccZ        string `json:"fAccZ"`        // :"0.0"
+	AccX         string `json:"accX"`         // :"944.000000"
+	AccY         string `json:"accY"`         // :"-356.000000"
+	AccZ         string `json:"accZ"`         // :"-16960.000000"
+	GyrX         string `json:"gyrX"`         // :"-491.000000"
+	GyrY         string `json:"gyrY"`         // :"15.000000"
+	GyrZ         string `json:"gyrZ"`         // :"196.000000"
+	ContimpactoX string `json:"contimpactoX"` // :"944.000000"
+	ContimpactoY string `json:"contimpactoY"` // :"412.000000"
+	ContimpactoZ string `json:"contimpactoZ"` // :"17968.000000"
+	Pitch        string `json:"pitch"`        // :"-1.200725"
+	Roll         string `json:"roll"`         // :"-3.185352"
+	Yaw          string `json:"yaw"`          // :"0.000000"}
+}
+
+type HealthPackTracking struct {
+	Latitude               string `json:"latitude"`               // :"0.000000"
+	Longitude              string `json:"longitude"`              // :"0.000000"
+	Tempbateriasecundaria  string `json:"tempbateriasecundaria"`  // :"24.2"
+	Tempbateriaprincipal   string `json:"tempbateriaprincipal"`   // :"23.6"
+	Temperaturacondensador string `json:"temperaturacondensador"` // :"28.1"
+	Temperaturacuba1       string `json:"temperaturacuba1"`       // :"-0.9"
+	Temperaturacuba2       string `json:"temperaturacuba2"`       // :"11.4"
+	TemperaturaexternaLL   string `json:"temperaturaexternaLL"`   // :"36.3"
+	TemperaturaexternaLS   string `json:"temperaturaexternaLS"`   // :"8.4"
+	Temperaturaexterna     string `json:"temperaturaexterna"`     // :"28.1"
+	Temperaturadissipador  string `json:"temperaturadissipador"`  // :"26.5"
+	Correntebateria        string `json:"correntebateria"`        // :"0.0"
+	Correntecompressor     string `json:"correntecompressor"`     // :"3.9"
+	Correntepeltier        string `json:"correntepeltier"`        // :"0.0"
+	Correntecooler         string `json:"correntecooler"`         // :"0.0"
+	Correnteexaustor       string `json:"correnteexaustor"`       // :"0.0"
+	Temperaturacompressor  string `json:"temperaturacompressor"`  // :"44.8"
+	Setpoint_pid1          string `json:"setpoint_pid1"`          // :"-5.0"
+	Valor_pid1_atual       string `json:"valor_pid1_atual"`       // :"-0.9"
+	Esforco_pid1           string `json:"esforco_pid1"`           // :"536.0"
+	Setpoint_pid2          string `json:"setpoint_pid2"`          // :"50.0"
+	Valor_pid2_atual       string `json:"valor_pid2_atual"`       // :"44.8"
+	Esforco_pid2           string `json:"esforco_pid2"`           // :"0.0"}
+}
+
+type HealthPackStatus struct {
+	Vbateriaprincipal           string `json:"vbateriaprincipal"`           // :"21.8"
+	Vbateriasecundaria          string `json:"vbateriasecundaria"`          // :"4.2"
+	Ventradafonteexterna        string `json:"ventradafonteexterna"`        // :"21.8"
+	Numerocaixa                 string `json:"numerocaixa"`                 // :"0.0"
+	Estadomaquina               string `json:"estadomaquina"`               // :"53.0"
+	Timestamp                   string `json:"timestamp"`                   // :"0.0"
+	IdFalha                     string `json:"idFalha"`                     // :"0.0"
+	Porcentagemsinalcomunicacao string `json:"porcentagemsinalcomunicacao"` // :"0.0"
+	FatorRH                     string `json:"fatorRH"`                     // :"0.0"
+	Btdown                      string `json:"btdown"`                      // :"0.0"
+	Btselect                    string `json:"btselect"`                    // :"0.0"
+	Btup                        string `json:"btup"`                        // :"0.0"
+	Tecla_enter                 string `json:"tecla_enter"`                 // :"0.0"
+	Statustampaprincipal        string `json:"statustampaprincipal"`        // :"1.0"
+	Statusserialprincipal       string `json:"statusserialprincipal"`       // :"0.0"
+	Statusserialsecundaria      string `json:"statusserialsecundaria"`      // :"0.0"
+	Statustampacasamaq          string `json:"statustampacasamaq"`          // :"0.0"
+	Controle_peltier            string `json:"controle_peltier"`            // :"0.0"
+	Porcentagem_bat             string `json:"porcentagem_bat"`             // :"100.0"}
+}
+
+type HealthPackIschemia struct {
+	IdModal                 string `json:"idModal"`
+	IdOperador              string `json:"IdOperador"`              // :""
+	Niveldepermissao        string `json:"niveldepermissao"`        // :""
+	Nome                    string `json:"nome"`                    // :""
+	Numtransplante          string `json:"numtransplante"`          // :""
+	Numeroempresa           string `json:"numeroempresa"`           // :""
+	Orgao                   string `json:"orgao"`                   // :"tecidos_oculares"
+	Tempo_total_isquemia    string `json:"tempo_total_isquemia"`    // :"00/00/00 00:00:00"
+	Tempo_restante_isquemia string `json:"tempo_restante_isquemia"` // :"00d 00:00"
+	Hora_isquemia           string `json:"hora_isquemia"`           // :""
+	Timeinfo_sp2            string `json:"timeinfo_sp2"`            // :"24:12:09 16:18:53"}
+}
+
+type HealthPackAlarm struct {
+	Alarms []string `json:"alarms"`
 }
 
 type NspiUp struct {
@@ -1585,8 +1663,8 @@ func parseEvseMeasurement(measurement string, data string) string {
 		sb.WriteString(strconv.FormatInt(evseStartTransaction.StartMeter, 10))
 		sb.WriteString(`,startTime=`)
 		sb.WriteString(strconv.FormatInt(evseStartTransaction.StartTime, 10))
-		sb.WriteString(`,idTag=`)
-		sb.WriteString(evseStartTransaction.IdTag)
+		// sb.WriteString(`,idTag=`)
+		// sb.WriteString(evseStartTransaction.IdTag)
 
 	case "StopTransaction":
 		var evseStopTransaction EvseStopTransaction
@@ -1626,9 +1704,9 @@ func parseEvse(featureName string, deviceType string, deviceId string, direction
 		sb.WriteString(evseUp.DeviceId)
 		sb.WriteString(`,deviceType=`)
 		sb.WriteString(deviceType)
-		sb.WriteString(`,connectorId="`)
+		sb.WriteString(`,connectorId=`)
 		sb.WriteString(evseUp.ConnectorId)
-		sb.WriteString(`",chargePointId=`)
+		sb.WriteString(`,chargePointId=`)
 		sb.WriteString(evseUp.ChargePointId)
 		// sb.WriteString(`,unit=`)
 		// sb.WriteString(evseUp.Unit)
@@ -1660,32 +1738,527 @@ func parseEvse(featureName string, deviceType string, deviceId string, direction
 
 func parseHealthPackMeasurement(measurement string, data string) string {
 	var sb strings.Builder
+	var healthPackUp HealthPackUp
+	var ok bool
 
 	if data == "" {
 		return "No data"
 	}
 
-	switch measurement {
-	case "Vital":
-		var healthPackVital HealthPackVital
-		json.Unmarshal([]byte(data), &healthPackVital)
+	json.Unmarshal([]byte(data), &healthPackUp)
 
-		sb.WriteString(`machineStatus=`)
-		sb.WriteString(healthPackVital.MachineStatus)
+	switch measurement {
+	case "Inertias":
+		// TODO: panic: interface conversion: interface {} is nil, not string
+
+		var healthPackInertias HealthPackInertias
+
+		if healthPackInertias.FAccX, ok = healthPackUp.Data["fAccX"].(string); ok {
+			if healthPackInertias.FAccX == "" {
+				healthPackInertias.FAccX = "empty"
+			}
+		} else {
+			return "No valid key fAccX to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.FAccY, ok = healthPackUp.Data["fAccY"].(string); ok {
+			if healthPackInertias.FAccY == "" {
+				healthPackInertias.FAccY = "empty"
+			}
+		} else {
+			return "No valid key fAccY to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.FAccZ, ok = healthPackUp.Data["fAccZ"].(string); ok {
+			if healthPackInertias.FAccZ == "" {
+				healthPackInertias.FAccZ = "empty"
+			}
+		} else {
+			return "No valid key fAccZ to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.AccX, ok = healthPackUp.Data["accX"].(string); ok {
+			if healthPackInertias.AccX == "" {
+				healthPackInertias.AccX = "empty"
+			}
+		} else {
+			return "No valid key accX to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.AccY, ok = healthPackUp.Data["accY"].(string); ok {
+			if healthPackInertias.AccY == "" {
+				healthPackInertias.AccY = "empty"
+			}
+		} else {
+			return "No valid key accY to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.AccZ, ok = healthPackUp.Data["accZ"].(string); ok {
+			if healthPackInertias.AccZ == "" {
+				healthPackInertias.AccZ = "empty"
+			}
+		} else {
+			return "No valid key accZ to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.GyrX, ok = healthPackUp.Data["gyrX"].(string); ok {
+			if healthPackInertias.GyrX == "" {
+				healthPackInertias.GyrX = "empty"
+			}
+		} else {
+			return "No valid key gyrX to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.GyrY, ok = healthPackUp.Data["gyrY"].(string); ok {
+			if healthPackInertias.GyrY == "" {
+				healthPackInertias.GyrY = "empty"
+			}
+		} else {
+			return "No valid key gyrY to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.GyrZ, ok = healthPackUp.Data["gyrZ"].(string); ok {
+			if healthPackInertias.GyrZ == "" {
+				healthPackInertias.GyrZ = "empty"
+			}
+		} else {
+			return "No valid key gyrZ to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.ContimpactoX, ok = healthPackUp.Data["contimpactoX"].(string); ok {
+			if healthPackInertias.ContimpactoX == "" {
+				healthPackInertias.ContimpactoX = "empty"
+			}
+		} else {
+			return "No valid key contimpactoX to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.ContimpactoY, ok = healthPackUp.Data["contimpactoY"].(string); ok {
+			if healthPackInertias.ContimpactoY == "" {
+				healthPackInertias.ContimpactoY = "empty"
+			}
+		} else {
+			return "No valid key contimpactoY to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.ContimpactoZ, ok = healthPackUp.Data["contimpactoZ"].(string); ok {
+			if healthPackInertias.ContimpactoZ == "" {
+				healthPackInertias.ContimpactoZ = "empty"
+			}
+		} else {
+			return "No valid key contimpactoZ to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.Pitch, ok = healthPackUp.Data["pitch"].(string); ok {
+			if healthPackInertias.Pitch == "" {
+				healthPackInertias.Pitch = "empty"
+			}
+		} else {
+			return "No valid key pitch to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.Roll, ok = healthPackUp.Data["roll"].(string); ok {
+			if healthPackInertias.Roll == "" {
+				healthPackInertias.Roll = "empty"
+			}
+		} else {
+			return "No valid key roll to parse in HealthPackMeasurement - Inertias."
+		}
+		if healthPackInertias.Yaw, ok = healthPackUp.Data["yaw"].(string); ok {
+			if healthPackInertias.Yaw == "" {
+				healthPackInertias.Yaw = "empty"
+			}
+		} else {
+			return "No valid key yaw to parse in HealthPackMeasurement - Inertias."
+		}
 
 		sb.WriteString(` `)
-		sb.WriteString(`bowlTemperature1=`)
-		sb.WriteString(strconv.FormatFloat(healthPackVital.BowlTemperature1, 'f', -1, 64))
-		sb.WriteString(`externalTemperature=`)
-		sb.WriteString(strconv.FormatFloat(healthPackVital.ExternalTemperature, 'f', -1, 64))
-		sb.WriteString(`latitude=`)
-		sb.WriteString(strconv.FormatFloat(healthPackVital.Latitude, 'f', -1, 64))
-		sb.WriteString(`longitude=`)
-		sb.WriteString(strconv.FormatFloat(healthPackVital.Longitude, 'f', -1, 64))
-		sb.WriteString(`altitude=`)
-		sb.WriteString(strconv.FormatFloat(healthPackVital.Altitude, 'f', -1, 64))
-		sb.WriteString(`pidEffort=`)
-		sb.WriteString(strconv.FormatFloat(healthPackVital.PidEffort, 'f', -1, 64))
+		sb.WriteString(`fAccX=`)
+		sb.WriteString(healthPackInertias.FAccX)
+		sb.WriteString(`,fAccY=`)
+		sb.WriteString(healthPackInertias.FAccY)
+		sb.WriteString(`,fAccZ=`)
+		sb.WriteString(healthPackInertias.FAccZ)
+		sb.WriteString(`,accX=`)
+		sb.WriteString(healthPackInertias.AccX)
+		sb.WriteString(`,accY=`)
+		sb.WriteString(healthPackInertias.AccY)
+		sb.WriteString(`,accZ=`)
+		sb.WriteString(healthPackInertias.AccZ)
+		sb.WriteString(`,gyrX=`)
+		sb.WriteString(healthPackInertias.GyrX)
+		sb.WriteString(`,gyrY=`)
+		sb.WriteString(healthPackInertias.GyrY)
+		sb.WriteString(`,gyrZ=`)
+		sb.WriteString(healthPackInertias.GyrZ)
+		sb.WriteString(`,contimpactoX=`)
+		sb.WriteString(healthPackInertias.ContimpactoX)
+		sb.WriteString(`,contimpactoY=`)
+		sb.WriteString(healthPackInertias.ContimpactoY)
+		sb.WriteString(`,contimpactoZ=`)
+		sb.WriteString(healthPackInertias.ContimpactoZ)
+		sb.WriteString(`,pitch=`)
+		sb.WriteString(healthPackInertias.Pitch)
+		sb.WriteString(`,roll=`)
+		sb.WriteString(healthPackInertias.Roll)
+		sb.WriteString(`,yaw=`)
+		sb.WriteString(healthPackInertias.Yaw)
+
+	case "Tracking ":
+		var healthPackTracking HealthPackTracking
+		json.Unmarshal([]byte(data), &healthPackTracking)
+
+		if healthPackTracking.Latitude, ok = healthPackUp.Data["latitude"].(string); ok {
+			if healthPackTracking.Latitude == "" {
+				healthPackTracking.Latitude = "empty"
+			}
+		} else {
+			return "No valid key latitude to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Longitude, ok = healthPackUp.Data["longitude"].(string); ok {
+			if healthPackTracking.Longitude == "" {
+				healthPackTracking.Longitude = "empty"
+			}
+		} else {
+			return "No valid key longitude to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Tempbateriasecundaria, ok = healthPackUp.Data["tempbateriasecundaria"].(string); ok {
+			if healthPackTracking.Tempbateriasecundaria == "" {
+				healthPackTracking.Tempbateriasecundaria = "empty"
+			}
+		} else {
+			return "No valid key tempbateriasecundaria to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Tempbateriaprincipal, ok = healthPackUp.Data["tempbateriaprincipal"].(string); ok {
+			if healthPackTracking.Tempbateriaprincipal == "" {
+				healthPackTracking.Tempbateriaprincipal = "empty"
+			}
+		} else {
+			return "No valid key tempbateriaprincipal to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Temperaturacondensador, ok = healthPackUp.Data["temperaturacondensador"].(string); ok {
+			if healthPackTracking.Temperaturacondensador == "" {
+				healthPackTracking.Temperaturacondensador = "empty"
+			}
+		} else {
+			return "No valid key temperaturacondensador to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Temperaturacuba1, ok = healthPackUp.Data["temperaturacuba1"].(string); ok {
+			if healthPackTracking.Temperaturacuba1 == "" {
+				healthPackTracking.Temperaturacuba1 = "empty"
+			}
+		} else {
+			return "No valid key temperaturacuba1 to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Temperaturacuba2, ok = healthPackUp.Data["temperaturacuba2"].(string); ok {
+			if healthPackTracking.Temperaturacuba2 == "" {
+				healthPackTracking.Temperaturacuba2 = "empty"
+			}
+		} else {
+			return "No valid key temperaturacuba2 to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.TemperaturaexternaLL, ok = healthPackUp.Data["temperaturaexternaLL"].(string); ok {
+			if healthPackTracking.TemperaturaexternaLL == "" {
+				healthPackTracking.TemperaturaexternaLL = "empty"
+			}
+		} else {
+			return "No valid key temperaturaexternaLL to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.TemperaturaexternaLS, ok = healthPackUp.Data["temperaturaexternaLS"].(string); ok {
+			if healthPackTracking.TemperaturaexternaLS == "" {
+				healthPackTracking.TemperaturaexternaLS = "empty"
+			}
+		} else {
+			return "No valid key temperaturaexternaLS to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Temperaturaexterna, ok = healthPackUp.Data["temperaturaexterna"].(string); ok {
+			if healthPackTracking.Temperaturaexterna == "" {
+				healthPackTracking.Temperaturaexterna = "empty"
+			}
+		} else {
+			return "No valid key temperaturaexterna to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Temperaturadissipador, ok = healthPackUp.Data["temperaturadissipador"].(string); ok {
+			if healthPackTracking.Temperaturadissipador == "" {
+				healthPackTracking.Temperaturadissipador = "empty"
+			}
+		} else {
+			return "No valid key temperaturadissipador to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Correntebateria, ok = healthPackUp.Data["correntebateria"].(string); ok {
+			if healthPackTracking.Correntebateria == "" {
+				healthPackTracking.Correntebateria = "empty"
+			}
+		} else {
+			return "No valid key correntebateria to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Correntecompressor, ok = healthPackUp.Data["correntecompressor"].(string); ok {
+			if healthPackTracking.Correntecompressor == "" {
+				healthPackTracking.Correntecompressor = "empty"
+			}
+		} else {
+			return "No valid key correntecompressor to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Correntepeltier, ok = healthPackUp.Data["correntepeltier"].(string); ok {
+			if healthPackTracking.Correntepeltier == "" {
+				healthPackTracking.Correntepeltier = "empty"
+			}
+		} else {
+			return "No valid key correntepeltier to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Correntecooler, ok = healthPackUp.Data["correntecooler"].(string); ok {
+			if healthPackTracking.Correntecooler == "" {
+				healthPackTracking.Correntecooler = "empty"
+			}
+		} else {
+			return "No valid key correntecooler to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Correnteexaustor, ok = healthPackUp.Data["correnteexaustor"].(string); ok {
+			if healthPackTracking.Correnteexaustor == "" {
+				healthPackTracking.Correnteexaustor = "empty"
+			}
+		} else {
+			return "No valid key correnteexaustor to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Temperaturacompressor, ok = healthPackUp.Data["temperaturacompressor"].(string); ok {
+			if healthPackTracking.Temperaturacompressor == "" {
+				healthPackTracking.Temperaturacompressor = "empty"
+			}
+		} else {
+			return "No valid key temperaturacompressor to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Setpoint_pid1, ok = healthPackUp.Data["setpoint_pid1"].(string); ok {
+			if healthPackTracking.Setpoint_pid1 == "" {
+				healthPackTracking.Setpoint_pid1 = "empty"
+			}
+		} else {
+			return "No valid key setpoint_pid1 to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Valor_pid1_atual, ok = healthPackUp.Data["valor_pid1_atual"].(string); ok {
+			if healthPackTracking.Valor_pid1_atual == "" {
+				healthPackTracking.Valor_pid1_atual = "empty"
+			}
+		} else {
+			return "No valid key valor_pid1_atual to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Esforco_pid1, ok = healthPackUp.Data["esforco_pid1"].(string); ok {
+			if healthPackTracking.Esforco_pid1 == "" {
+				healthPackTracking.Esforco_pid1 = "empty"
+			}
+		} else {
+			return "No valid key esforco_pid1 to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Setpoint_pid2, ok = healthPackUp.Data["setpoint_pid2"].(string); ok {
+			if healthPackTracking.Setpoint_pid2 == "" {
+				healthPackTracking.Setpoint_pid2 = "empty"
+			}
+		} else {
+			return "No valid key setpoint_pid2 to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Valor_pid2_atual, ok = healthPackUp.Data["valor_pid2_atual"].(string); ok {
+			if healthPackTracking.Valor_pid2_atual == "" {
+				healthPackTracking.Valor_pid2_atual = "empty"
+			}
+		} else {
+			return "No valid key valor_pid2_atual to parse in HealthPackMeasurement - Tracking."
+		}
+		if healthPackTracking.Esforco_pid2, ok = healthPackUp.Data["esforco_pid2"].(string); ok {
+			if healthPackTracking.Esforco_pid2 == "" {
+				healthPackTracking.Esforco_pid2 = "empty"
+			}
+		} else {
+			return "No valid key esforco_pid2 to parse in HealthPackMeasurement - Tracking."
+		}
+
+		sb.WriteString(`,latitude=`)
+		sb.WriteString(healthPackTracking.Latitude)
+		sb.WriteString(`,longitude=`)
+		sb.WriteString(healthPackTracking.Longitude)
+		sb.WriteString(`,tempbateriasecundaria=`)
+		sb.WriteString(healthPackTracking.Tempbateriasecundaria)
+		sb.WriteString(`,tempbateriaprincipal=`)
+		sb.WriteString(healthPackTracking.Tempbateriaprincipal)
+		sb.WriteString(`,temperaturacondensador=`)
+		sb.WriteString(healthPackTracking.Temperaturacondensador)
+		sb.WriteString(`,temperaturacuba1=`)
+		sb.WriteString(healthPackTracking.Temperaturacuba1)
+		sb.WriteString(`,temperaturacuba2=`)
+		sb.WriteString(healthPackTracking.Temperaturacuba2)
+		sb.WriteString(`,temperaturaexternaLL=`)
+		sb.WriteString(healthPackTracking.TemperaturaexternaLL)
+		sb.WriteString(`,temperaturaexternaLS=`)
+		sb.WriteString(healthPackTracking.TemperaturaexternaLS)
+		sb.WriteString(`,temperaturaexterna=`)
+		sb.WriteString(healthPackTracking.Temperaturaexterna)
+		sb.WriteString(`,temperaturadissipador=`)
+		sb.WriteString(healthPackTracking.Temperaturadissipador)
+		sb.WriteString(`,correntebateria=`)
+		sb.WriteString(healthPackTracking.Correntebateria)
+		sb.WriteString(`,correntecompressor=`)
+		sb.WriteString(healthPackTracking.Correntecompressor)
+		sb.WriteString(`,correntepeltier=`)
+		sb.WriteString(healthPackTracking.Correntepeltier)
+		sb.WriteString(`,correntecooler=`)
+		sb.WriteString(healthPackTracking.Correntecooler)
+		sb.WriteString(`,correnteexaustor=`)
+		sb.WriteString(healthPackTracking.Correnteexaustor)
+		sb.WriteString(`,temperaturacompressor=`)
+		sb.WriteString(healthPackTracking.Temperaturacompressor)
+		sb.WriteString(`,setpoint_pid1=`)
+		sb.WriteString(healthPackTracking.Setpoint_pid1)
+		sb.WriteString(`,valor_pid1_atual=`)
+		sb.WriteString(healthPackTracking.Valor_pid1_atual)
+		sb.WriteString(`,esforco_pid1=`)
+		sb.WriteString(healthPackTracking.Esforco_pid1)
+		sb.WriteString(`,setpoint_pid2=`)
+		sb.WriteString(healthPackTracking.Setpoint_pid2)
+		sb.WriteString(`,valor_pid2_atual=`)
+		sb.WriteString(healthPackTracking.Valor_pid2_atual)
+		sb.WriteString(`,esforco_pid2=`)
+		sb.WriteString(healthPackTracking.Esforco_pid2)
+
+	case "Status":
+		var healthPackStatus HealthPackStatus
+		json.Unmarshal([]byte(data), &healthPackStatus)
+
+		sb.WriteString(`,vbateriaprincipal=`)
+		sb.WriteString(healthPackStatus.Vbateriaprincipal)
+		sb.WriteString(`,vbateriasecundaria=`)
+		sb.WriteString(healthPackStatus.Vbateriasecundaria)
+		sb.WriteString(`,ventradafonteexterna=`)
+		sb.WriteString(healthPackStatus.Ventradafonteexterna)
+		sb.WriteString(`,numerocaixa=`)
+		sb.WriteString(healthPackStatus.Numerocaixa)
+		sb.WriteString(`,estadomaquina=`)
+		sb.WriteString(healthPackStatus.Estadomaquina)
+		sb.WriteString(`,timestamp=`)
+		sb.WriteString(healthPackStatus.Timestamp)
+		sb.WriteString(`,idFalha=`)
+		sb.WriteString(healthPackStatus.IdFalha)
+		sb.WriteString(`,porcentagemsinalcomunicacao=`)
+		sb.WriteString(healthPackStatus.Porcentagemsinalcomunicacao)
+		sb.WriteString(`,fatorRH=`)
+		sb.WriteString(healthPackStatus.FatorRH)
+		sb.WriteString(`,btdown=`)
+		sb.WriteString(healthPackStatus.Btdown)
+		sb.WriteString(`,btselect=`)
+		sb.WriteString(healthPackStatus.Btselect)
+		sb.WriteString(`,btup=`)
+		sb.WriteString(healthPackStatus.Btup)
+		sb.WriteString(`,tecla_enter=`)
+		sb.WriteString(healthPackStatus.Tecla_enter)
+		sb.WriteString(`,statustampaprincipal=`)
+		sb.WriteString(healthPackStatus.Statustampaprincipal)
+		sb.WriteString(`,statusserialprincipal=`)
+		sb.WriteString(healthPackStatus.Statusserialprincipal)
+		sb.WriteString(`,statusserialsecundaria=`)
+		sb.WriteString(healthPackStatus.Statusserialsecundaria)
+		sb.WriteString(`,statustampacasamaq=`)
+		sb.WriteString(healthPackStatus.Statustampacasamaq)
+		sb.WriteString(`,controle_peltier=`)
+		sb.WriteString(healthPackStatus.Controle_peltier)
+		sb.WriteString(`porcentagem_bat,=`)
+		sb.WriteString(healthPackStatus.Porcentagem_bat)
+
+	case "Ischemia":
+		var healthPackIschemia HealthPackIschemia
+		json.Unmarshal([]byte(data), &healthPackIschemia)
+
+		if healthPackIschemia.IdModal, ok = healthPackUp.Data["idModal"].(string); ok {
+			if healthPackIschemia.IdModal == "" {
+				healthPackIschemia.IdModal = "empty"
+			}
+		} else {
+			return "No valid key to parse in HealthPackMeasurement - Ischemia."
+		}
+		if healthPackIschemia.IdOperador, ok = healthPackUp.Data["IdOperador"].(string); ok {
+			if healthPackIschemia.IdOperador == "" {
+				healthPackIschemia.IdOperador = "empty"
+			}
+		} else {
+			return "No valid key to parse in HealthPackMeasurement - Ischemia."
+		}
+		if healthPackIschemia.Niveldepermissao, ok = healthPackUp.Data["niveldepermissao"].(string); ok {
+			if healthPackIschemia.Niveldepermissao == "" {
+				healthPackIschemia.Niveldepermissao = "empty"
+			}
+		} else {
+			return "No valid key to parse in HealthPackMeasurement - Ischemia."
+		}
+		if healthPackIschemia.Nome, ok = healthPackUp.Data["nome"].(string); ok {
+			if healthPackIschemia.Nome == "" {
+				healthPackIschemia.Nome = "empty"
+			}
+		} else {
+			return "No valid key to parse in HealthPackMeasurement - Ischemia."
+		}
+		if healthPackIschemia.Numtransplante, ok = healthPackUp.Data["numtransplante"].(string); ok {
+			if healthPackIschemia.Numtransplante == "" {
+				healthPackIschemia.Numtransplante = "empty"
+			}
+		} else {
+			return "No valid key to parse in HealthPackMeasurement - Ischemia."
+		}
+		if healthPackIschemia.Numeroempresa, ok = healthPackUp.Data["numeroempresa"].(string); ok {
+			if healthPackIschemia.Numeroempresa == "" {
+				healthPackIschemia.Numeroempresa = "empty"
+			}
+		} else {
+			return "No valid key to parse in HealthPackMeasurement - Ischemia."
+		}
+		if healthPackIschemia.Orgao, ok = healthPackUp.Data["orgao"].(string); ok {
+			if healthPackIschemia.Orgao == "" {
+				healthPackIschemia.Orgao = "empty"
+			}
+		} else {
+			return "No valid key to parse in HealthPackMeasurement - Ischemia."
+		}
+		if healthPackIschemia.Tempo_total_isquemia, ok = healthPackUp.Data["tempo_total_isquemia"].(string); ok {
+			if healthPackIschemia.Tempo_total_isquemia == "" {
+				healthPackIschemia.Tempo_total_isquemia = "Tempo_total_isquemia"
+			}
+		} else {
+			return "No valid key to parse in HealthPackMeasurement - Ischemia."
+		}
+		if healthPackIschemia.Tempo_restante_isquemia, ok = healthPackUp.Data["tempo_restante_isquemia"].(string); ok {
+			if healthPackIschemia.Tempo_restante_isquemia == "" {
+				healthPackIschemia.Tempo_restante_isquemia = "Tempo_restante_isquemia"
+			}
+		} else {
+			return "No valid key to parse in HealthPackMeasurement - Ischemia."
+		}
+		if healthPackIschemia.Hora_isquemia, ok = healthPackUp.Data["hora_isquemia"].(string); ok {
+			if healthPackIschemia.Hora_isquemia == "" {
+				healthPackIschemia.Hora_isquemia = "empty"
+			}
+		} else {
+			return "No valid key to parse in HealthPackMeasurement - Ischemia."
+		}
+		if healthPackIschemia.Timeinfo_sp2, ok = healthPackUp.Data["timeinfo_sp2"].(string); ok {
+			if healthPackIschemia.Timeinfo_sp2 == "" {
+				healthPackIschemia.Timeinfo_sp2 = "empty"
+			}
+		} else {
+			return "No valid key to parse in HealthPackMeasurement - Ischemia."
+		}
+
+		sb.WriteString(`,idModal=`)
+		sb.WriteString(healthPackIschemia.IdModal)
+		sb.WriteString(`,IdOperador=`)
+		sb.WriteString(healthPackIschemia.IdOperador)
+		sb.WriteString(`,niveldepermissao=`)
+		sb.WriteString(healthPackIschemia.Niveldepermissao)
+		sb.WriteString(`,nome=`)
+		sb.WriteString(healthPackIschemia.Nome)
+		sb.WriteString(`,numtransplante=`)
+		sb.WriteString(healthPackIschemia.Numtransplante)
+		sb.WriteString(`,numeroempresa=`)
+		sb.WriteString(healthPackIschemia.Numeroempresa)
+		sb.WriteString(`,orgao=`)
+		sb.WriteString(healthPackIschemia.Orgao)
+		sb.WriteString(`,tempo_total_isquemia=`)
+		sb.WriteString(healthPackIschemia.Tempo_total_isquemia)
+		sb.WriteString(`,tempo_restante_isquemia=`)
+		sb.WriteString(healthPackIschemia.Tempo_restante_isquemia)
+		sb.WriteString(`,hora_isquemia=`)
+		sb.WriteString(healthPackIschemia.Hora_isquemia)
+		sb.WriteString(`,timeinfo_sp2=`)
+		sb.WriteString(healthPackIschemia.Timeinfo_sp2)
+
+		// case "Alarm":
+		// 	var healthPackAlarm HealthPackAlarm
+		// 	json.Unmarshal([]byte(data), &healthPackAlarm)
+
+		// 	sb.WriteString(`,alarms=`)
+		// 	sb.WriteString(healthPackAlarm.Alarms[0])
+
 	}
 
 	return sb.String()
@@ -1694,6 +2267,7 @@ func parseHealthPackMeasurement(measurement string, data string) string {
 func parseHealthPack(featureName string, deviceType string, deviceId string, direction string, etc string, message string) string {
 	var sb strings.Builder
 	var healthPackUp HealthPackUp
+	var healthPackUpProps HealthPackUpProps
 
 	if message == "" {
 		return "No message to parse"
@@ -1701,29 +2275,26 @@ func parseHealthPack(featureName string, deviceType string, deviceId string, dir
 
 	if direction == "up" {
 		var measurement strings.Builder
+		var setUTC strings.Builder
 
+		// JSON to healthPackUp struct
 		json.Unmarshal([]byte(message), &healthPackUp)
-		// measurement.WriteString("Evse")
+		healthPackUpProps.DeviceName = healthPackUp.Props.DeviceName
+		healthPackUpProps.DeviceIp = healthPackUp.Props.DeviceIp
+		healthPackUpProps.MacAddress = healthPackUp.Props.MacAddress
+
 		measurement.WriteString(featureName)
-		// Measurement
 		sb.WriteString(measurement.String())
 
 		// Tags
 		sb.WriteString(`,deviceId=`)
-		sb.WriteString(healthPackUp.DeviceId)
+		sb.WriteString(healthPackUpProps.DeviceName)
 		sb.WriteString(`,deviceType=`)
 		sb.WriteString(deviceType)
-
-		// sb.WriteString(`,unit=`)
-		// sb.WriteString(evseUp.Unit)
-		// sb.WriteString(`,format=`)
-		// sb.WriteString(evseUp.Format)
-		// sb.WriteString(`,measurand=`)
-		// sb.WriteString(evseUp.Measurand)
-		// sb.WriteString(`,context=`)
-		// sb.WriteString(evseUp.Context)
-		// sb.WriteString(`,location=`)
-		// sb.WriteString(evseUp.Location)
+		sb.WriteString(`,macAddress=`)
+		sb.WriteString(healthPackUpProps.MacAddress)
+		sb.WriteString(`,macAddress=`)
+		sb.WriteString(healthPackUpProps.DeviceIp)
 
 		sb.WriteString(`,direction=`)
 		sb.WriteString(direction)
@@ -1731,14 +2302,26 @@ func parseHealthPack(featureName string, deviceType string, deviceId string, dir
 		sb.WriteString(etc)
 
 		// Fields
-		// sb.WriteString(`,fowardEnergy=`)
-		// sb.WriteString(strconv.FormatUint(evseUp.FowardEnergy, 10))
 		sb.WriteString(parseHealthPackMeasurement(measurement.String(), message))
 
 		// Timestamp_ns
 		sb.WriteString(` `)
-		sb.WriteString(strconv.FormatInt(healthPackUp.Timestamp, 10))
+
+		dateString := healthPackUp.Date
+		setUTC.WriteString("20")
+		setUTC.WriteString(dateString)
+		setUTC.WriteString(" -0300")
+
+		layout := "2006:01:02 15:04:05 -0700"
+
+		t, err := time.Parse(layout, setUTC.String())
+		if err != nil {
+			fmt.Println("Error parsing date:", err)
+		}
+
+		sb.WriteString(strconv.FormatInt(t.UnixNano(), 10))
 	}
+
 	return sb.String()
 }
 
@@ -1829,7 +2412,7 @@ func connLostHandler(c MQTT.Client, err error) {
 
 func main() {
 	id := uuid.New().String()
-	ORGANIZATION := os.Getenv("ORGANIZATION")
+	// ORGANIZATION := os.Getenv("ORGANIZATION")
 	// DEVICE_TYPE := os.Getenv("DEVICE_TYPE")
 	BUCKET := os.Getenv("BUCKET")
 	MQTT_BROKER := os.Getenv("MQTT_BROKER")
@@ -1844,22 +2427,17 @@ func main() {
 	var sbMqttSubTopic strings.Builder
 	// sbMqttSubTopic.WriteString("debug/OpenDataTelemetry/")
 	sbMqttSubTopic.WriteString("OpenDataTelemetry/")
-	sbMqttSubTopic.WriteString(ORGANIZATION)
+	// sbMqttSubTopic.WriteString(ORGANIZATION)
 	// sbMqttSubTopic.WriteString("/")
 	// sbMqttSubTopic.WriteString(DEVICE_TYPE)
-	sbMqttSubTopic.WriteString("/+/+/+/+/+")
+	sbMqttSubTopic.WriteString("+/+/+/+/+/+")
+	// sbMqttSubTopic.WriteString("#")
 	// sbMqttSubTopic.WriteString("/+/+/+")
 
 	// KafkaProducerClient
 	var sbKafkaProdClientId strings.Builder
 	sbKafkaProdClientId.WriteString("parse-lns-prod-")
 	sbKafkaProdClientId.WriteString(id)
-
-	// KafkaProducerClient
-	var sbKafkaProdTopic strings.Builder
-	sbKafkaProdTopic.WriteString(ORGANIZATION)
-	sbKafkaProdTopic.WriteString(".")
-	sbKafkaProdTopic.WriteString(BUCKET)
 
 	// MQTT
 	mqttSubBroker := MQTT_BROKER
@@ -1923,8 +2501,10 @@ func main() {
 		// 2. Process
 		// 2.1. Process Topic
 		s := strings.Split(incoming[0], "/")
+		fmt.Printf("\nTopic: %s", incoming[0])
 		// OpenDataTelemetry/IMT/LNS/MEASUREMENT/DEVICE_ID/up/imt
 		// OpenDataTelemetry/IMT/LNS/MEASUREMENT/DEVICE_ID/down/chirpstackv4
+		organization := s[1]
 		deviceType := s[2]
 		measurement := s[3]
 		deviceId := s[4]
@@ -1951,8 +2531,8 @@ func main() {
 		// evse_startTransaction, raw= timestamp_ms
 		// evse_heartbeat, raw= timestamp_ms
 
-		if ORGANIZATION == "IMT" {
-
+		switch organization {
+		case "IMT":
 			switch deviceType {
 			case "LNS":
 				// var influx Influx
@@ -1962,16 +2542,18 @@ func main() {
 			case "EVSE":
 				kafkaMessage = parseEvse(measurement, deviceType, deviceId, direction, etc, incoming[1])
 
-			case "HealthPack":
-				kafkaMessage = parseHealthPack(measurement, deviceType, deviceId, direction, etc, incoming[1])
-
 			case "NSPI":
 				kafkaMessage = parseNspi(measurement, deviceType, deviceId, direction, etc, incoming[1])
 
 			default:
 			}
-			fmt.Printf("\nMessage: %s", kafkaMessage)
+		case "SaoRafael":
+			switch deviceType {
+			case "HealthPack":
+				kafkaMessage = parseHealthPack(measurement, deviceType, deviceId, direction, etc, incoming[1])
+			}
 
+			fmt.Printf("\nMessage: %s", kafkaMessage)
 		}
 
 		// return influx line protocol
@@ -1979,6 +2561,11 @@ func main() {
 		// fmt.Printf("InfluxLineProtocol: %s\n", kafkaMessage)
 
 		// SET KAFKA
+		// KafkaProducerClient
+		var sbKafkaProdTopic strings.Builder
+		sbKafkaProdTopic.WriteString(organization)
+		sbKafkaProdTopic.WriteString(".")
+		sbKafkaProdTopic.WriteString(BUCKET)
 		kafkaProdTopic := sbKafkaProdTopic.String()
 		// pClient.Publish(sbPubTopic.String(), byte(pQos), false, incoming[1])
 
