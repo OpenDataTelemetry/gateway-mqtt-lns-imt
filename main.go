@@ -2437,7 +2437,7 @@ func parseHealthPack(featureName string, deviceType string, deviceId string, dir
 		sb.WriteString(deviceType)
 		sb.WriteString(`,macAddress=`)
 		sb.WriteString(healthPackUpProps.MacAddress)
-		sb.WriteString(`,macAddress=`)
+		sb.WriteString(`,deviceIp=`)
 		sb.WriteString(healthPackUpProps.DeviceIp)
 
 		sb.WriteString(`,direction=`)
