@@ -2370,7 +2370,8 @@ func parseHealthPackMeasurement(measurement string, data string) string {
 			return "No valid key to parse in HealthPackMeasurement - Ischemia."
 		}
 
-		sb.WriteString(`,idModal=`)
+		sb.WriteString(` `)
+		sb.WriteString(`idModal=`)
 		sb.WriteString(healthPackIschemia.IdModal)
 		sb.WriteString(`,IdOperador=`)
 		sb.WriteString(healthPackIschemia.IdOperador)
