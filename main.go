@@ -142,7 +142,7 @@ type HealthPackIschemia struct {
 }
 
 type HealthPackAlarm struct {
-	Alarms []string `json:"alarms"`
+	Alarms map[string]interface{} `json:"alarms"`
 }
 
 type NspiUp struct {
@@ -1749,8 +1749,6 @@ func parseHealthPackMeasurement(measurement string, data string) string {
 
 	switch measurement {
 	case "Inertias":
-		// TODO: panic: interface conversion: interface {} is nil, not string
-
 		var healthPackInertias HealthPackInertias
 
 		if healthPackInertias.FAccX, ok = healthPackUp.Data["fAccX"].(string); ok {
@@ -1891,7 +1889,7 @@ func parseHealthPackMeasurement(measurement string, data string) string {
 		sb.WriteString(`,yaw=`)
 		sb.WriteString(healthPackInertias.Yaw)
 
-	case "Tracking ":
+	case "Tracking":
 		var healthPackTracking HealthPackTracking
 		json.Unmarshal([]byte(data), &healthPackTracking)
 
@@ -2057,7 +2055,8 @@ func parseHealthPackMeasurement(measurement string, data string) string {
 			return "No valid key esforco_pid2 to parse in HealthPackMeasurement - Tracking."
 		}
 
-		sb.WriteString(`,latitude=`)
+		sb.WriteString(` `)
+		sb.WriteString(`latitude=`)
 		sb.WriteString(healthPackTracking.Latitude)
 		sb.WriteString(`,longitude=`)
 		sb.WriteString(healthPackTracking.Longitude)
@@ -2108,7 +2107,149 @@ func parseHealthPackMeasurement(measurement string, data string) string {
 		var healthPackStatus HealthPackStatus
 		json.Unmarshal([]byte(data), &healthPackStatus)
 
-		sb.WriteString(`,vbateriaprincipal=`)
+		if healthPackStatus.Vbateriaprincipal, ok = healthPackUp.Data["vbateriaprincipal"].(string); ok {
+			if healthPackStatus.Vbateriaprincipal == "" {
+				healthPackStatus.Vbateriaprincipal = "empty"
+			}
+		} else {
+			return "No valid key vbateriaprincipal to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Vbateriasecundaria, ok = healthPackUp.Data["vbateriasecundaria"].(string); ok {
+			if healthPackStatus.Vbateriasecundaria == "" {
+				healthPackStatus.Vbateriasecundaria = "empty"
+			}
+		} else {
+			return "No valid key vbateriasecundaria to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Ventradafonteexterna, ok = healthPackUp.Data["ventradafonteexterna"].(string); ok {
+			if healthPackStatus.Ventradafonteexterna == "" {
+				healthPackStatus.Ventradafonteexterna = "empty"
+			}
+		} else {
+			return "No valid key ventradafonteexterna to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Numerocaixa, ok = healthPackUp.Data["numerocaixa"].(string); ok {
+			if healthPackStatus.Numerocaixa == "" {
+				healthPackStatus.Numerocaixa = "empty"
+			}
+		} else {
+			return "No valid key numerocaixa to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Estadomaquina, ok = healthPackUp.Data["estadomaquina"].(string); ok {
+			if healthPackStatus.Estadomaquina == "" {
+				healthPackStatus.Estadomaquina = "empty"
+			}
+		} else {
+			return "No valid key estadomaquina to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Timestamp, ok = healthPackUp.Data["timestamp"].(string); ok {
+			if healthPackStatus.Timestamp == "" {
+				healthPackStatus.Timestamp = "empty"
+			}
+		} else {
+			return "No valid key timestamp to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.IdFalha, ok = healthPackUp.Data["idFalha"].(string); ok {
+			if healthPackStatus.IdFalha == "" {
+				healthPackStatus.IdFalha = "empty"
+			}
+		} else {
+			return "No valid key idFalha to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Porcentagemsinalcomunicacao, ok = healthPackUp.Data["porcentagemsinalcomunicacao"].(string); ok {
+			if healthPackStatus.Porcentagemsinalcomunicacao == "" {
+				healthPackStatus.Porcentagemsinalcomunicacao = "empty"
+			}
+		} else {
+			return "No valid key porcentagemsinalcomunicacao to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.FatorRH, ok = healthPackUp.Data["fatorRH"].(string); ok {
+			if healthPackStatus.FatorRH == "" {
+				healthPackStatus.FatorRH = "empty"
+			}
+		} else {
+			return "No valid key fatorRH to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Btdown, ok = healthPackUp.Data["btdown"].(string); ok {
+			if healthPackStatus.Btdown == "" {
+				healthPackStatus.Btdown = "empty"
+			}
+		} else {
+			return "No valid key btdown to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Btselect, ok = healthPackUp.Data["btselect"].(string); ok {
+			if healthPackStatus.Btselect == "" {
+				healthPackStatus.Btselect = "empty"
+			}
+		} else {
+			return "No valid key btselect to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Btup, ok = healthPackUp.Data["btup"].(string); ok {
+			if healthPackStatus.Btup == "" {
+				healthPackStatus.Btup = "empty"
+			}
+		} else {
+			return "No valid key btup to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Tecla_enter, ok = healthPackUp.Data["tecla_enter"].(string); ok {
+			if healthPackStatus.Tecla_enter == "" {
+				healthPackStatus.Tecla_enter = "empty"
+			}
+		} else {
+			return "No valid key tecla_enter to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Statustampaprincipal, ok = healthPackUp.Data["statustampaprincipal"].(string); ok {
+			if healthPackStatus.Statustampaprincipal == "" {
+				healthPackStatus.Statustampaprincipal = "empty"
+			}
+		} else {
+			return "No valid key statustampaprincipal to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Statustampaprincipal, ok = healthPackUp.Data["statustampaprincipal"].(string); ok {
+			if healthPackStatus.Statustampaprincipal == "" {
+				healthPackStatus.Statustampaprincipal = "empty"
+			}
+		} else {
+			return "No valid key statustampaprincipal to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Statusserialprincipal, ok = healthPackUp.Data["statusserialprincipal"].(string); ok {
+			if healthPackStatus.Statusserialprincipal == "" {
+				healthPackStatus.Statusserialprincipal = "empty"
+			}
+		} else {
+			return "No valid key statusserialprincipal to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Statusserialsecundaria, ok = healthPackUp.Data["statusserialsecundaria"].(string); ok {
+			if healthPackStatus.Statusserialsecundaria == "" {
+				healthPackStatus.Statusserialsecundaria = "empty"
+			}
+		} else {
+			return "No valid key statusserialsecundaria to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Statustampacasamaq, ok = healthPackUp.Data["statustampacasamaq"].(string); ok {
+			if healthPackStatus.Statustampacasamaq == "" {
+				healthPackStatus.Statustampacasamaq = "empty"
+			}
+		} else {
+			return "No valid key statustampacasamaq to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Controle_peltier, ok = healthPackUp.Data["controle_peltier"].(string); ok {
+			if healthPackStatus.Controle_peltier == "" {
+				healthPackStatus.Controle_peltier = "empty"
+			}
+		} else {
+			return "No valid key controle_peltier to parse in HealthPackMeasurement - Status."
+		}
+		if healthPackStatus.Porcentagem_bat, ok = healthPackUp.Data["porcentagem_bat"].(string); ok {
+			if healthPackStatus.Porcentagem_bat == "" {
+				healthPackStatus.Porcentagem_bat = "empty"
+			}
+		} else {
+			return "No valid key porcentagem_bat to parse in HealthPackMeasurement - Status."
+		}
+
+		sb.WriteString(` `)
+		sb.WriteString(`vbateriaprincipal=`)
 		sb.WriteString(healthPackStatus.Vbateriaprincipal)
 		sb.WriteString(`,vbateriasecundaria=`)
 		sb.WriteString(healthPackStatus.Vbateriasecundaria)
@@ -2144,7 +2285,7 @@ func parseHealthPackMeasurement(measurement string, data string) string {
 		sb.WriteString(healthPackStatus.Statustampacasamaq)
 		sb.WriteString(`,controle_peltier=`)
 		sb.WriteString(healthPackStatus.Controle_peltier)
-		sb.WriteString(`porcentagem_bat,=`)
+		sb.WriteString(`,porcentagem_bat=`)
 		sb.WriteString(healthPackStatus.Porcentagem_bat)
 
 	case "Ischemia":
@@ -2256,8 +2397,9 @@ func parseHealthPackMeasurement(measurement string, data string) string {
 		// 	var healthPackAlarm HealthPackAlarm
 		// 	json.Unmarshal([]byte(data), &healthPackAlarm)
 
-		// 	sb.WriteString(`,alarms=`)
-		// 	sb.WriteString(healthPackAlarm.Alarms[0])
+		// // TODO: Verify if alarm is not nil, then poarse it!
+		// sb.WriteString(`,alarms=`)
+		// sb.WriteString(healthPackAlarm.Alarms)
 
 	}
 
@@ -2268,6 +2410,8 @@ func parseHealthPack(featureName string, deviceType string, deviceId string, dir
 	var sb strings.Builder
 	var healthPackUp HealthPackUp
 	var healthPackUpProps HealthPackUpProps
+
+	// TODO: SET ALL TIMES TO TIMESTAMP IN NS
 
 	if message == "" {
 		return "No message to parse"
@@ -2399,11 +2543,6 @@ func parseNspi(featureName string, deviceType string, deviceId string, direction
 	}
 	return sb.String()
 }
-
-// func parseEvse(deviceId string, direction string, etc string, message string) string {
-// 	var s string
-//		return s
-//	}
 
 func connLostHandler(c MQTT.Client, err error) {
 	fmt.Printf("Connection lost, reason: %v\n", err)
@@ -2563,7 +2702,9 @@ func main() {
 		// SET KAFKA
 		// KafkaProducerClient
 		var sbKafkaProdTopic strings.Builder
-		sbKafkaProdTopic.WriteString(organization)
+		// TODO : parse by ORGANIZATION
+		// sbKafkaProdTopic.WriteString(organization)
+		sbKafkaProdTopic.WriteString("IMT")
 		sbKafkaProdTopic.WriteString(".")
 		sbKafkaProdTopic.WriteString(BUCKET)
 		kafkaProdTopic := sbKafkaProdTopic.String()
