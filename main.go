@@ -1693,8 +1693,9 @@ func parseEvseMeasurement(measurement string, data string) string {
 		// sb.WriteString(`,vendorErrorCode=`)
 		// sb.WriteString(evseStatusNotification.VendorErrorCode)
 		sb.WriteString(` `)
-		sb.WriteString(`status=`)
+		sb.WriteString(`status="`)
 		sb.WriteString(evseStatusNotification.Status)
+		sb.WriteString(`"`)
 		// sb.WriteString(`,info=`)
 		// sb.WriteString(evseStatusNotification.Info)
 
