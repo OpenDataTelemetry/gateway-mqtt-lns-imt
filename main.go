@@ -44,9 +44,17 @@ type LnsUp struct {
 }
 
 type LnsAlert struct {
-	DeviceId  string `json:"deviceId"`
-	Data      string `json:"data"`
-	Timestamp int64  `json:"timestamp"`
+	DeviceId     string `json:"deviceId"`
+	DeviceType   string `json:"deviceType"`
+	Etc          string `json:"etc"`
+	Data         string `json:"data"`
+	Timestamp    int64  `json:"timestamp"`
+	Trigger      string `json:"trigger"`
+	TriggerAt    string `json:"triggerAt"`
+	TriggerType  string `json:"triggerType"`
+	LastPlayed   string `json:"lastPlayed"`
+	ActionSensor string `json:"actionSensor"`
+	CurrentValue string `json:"currentValue"`
 }
 
 type HealthPackUp struct {
@@ -1588,6 +1596,39 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 	if direction == "alert" {
 		json.Unmarshal([]byte(message), &lnsAlert)
 
+		var trigger string
+		var triggerAt string
+		var triggerType string
+		var actionSensor string
+
+		if lnsAlert.Trigger != "" {
+			trigger = lnsAlert.Trigger
+		} else {
+			trigger = "empty"
+		}
+
+		if lnsAlert.TriggerAt != "" {
+			triggerAt = lnsAlert.TriggerAt
+		} else {
+			triggerAt = "empty"
+		}
+
+		if lnsAlert.TriggerType != "" {
+			triggerType = lnsAlert.TriggerType
+		} else {
+			triggerType = "empty"
+		}
+
+		if lnsAlert.ActionSensor != "" {
+			actionSensor = lnsAlert.ActionSensor
+		} else {
+			actionSensor = "empty"
+		}
+
+		// triggerType
+		// lastPlayed
+		// actionSensor
+		// currentValue
 		// Measurement
 		// sb.WriteString("Lns")
 		sb.WriteString(measurement)
@@ -1599,21 +1640,34 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		// sb.WriteString(`,type=alert`)
 		sb.WriteString(`,direction=`)
 		sb.WriteString(direction)
-		sb.WriteString(`,origin=`)
+		sb.WriteString(`,etc=`)
 		sb.WriteString(etc)
 
-		sb.WriteString(`,deviceId=`)
-		sb.WriteString(lnsAlert.DeviceId)
-
+		// unixTimestamp := lnsAlert.LastPlayed.UnixNano()
 		// Fields
 		sb.WriteString(` `)
 		sb.WriteString(`data="`)
 		sb.WriteString(lnsAlert.Data)
+		sb.WriteString(`",trigger="`)
+		sb.WriteString(trigger)
+		sb.WriteString(`",triggerAt="`)
+		sb.WriteString(triggerAt)
+		sb.WriteString(`",triggerType="`)
+		sb.WriteString(triggerType)
+		sb.WriteString(`"`)
+		// sb.WriteString(`",lastPlayed=`)
+		// sb.WriteString(lnsAlert.LastPlayed)
+		sb.WriteString(`,actionSensor="`)
+		sb.WriteString(actionSensor)
+		sb.WriteString(`",currentValue="`)
+		sb.WriteString(lnsAlert.CurrentValue)
 		sb.WriteString(`"`)
 
 		// Timestamp_ms
 		sb.WriteString(` `)
 		sb.WriteString(strconv.FormatInt(int64(lnsAlert.Timestamp), 10))
+		fmt.Printf("\n\nALERT PAYLOAD: %s", sb.String())
+		fmt.Printf("\n\nALERT TIMESTAMP: %v", lnsAlert.Timestamp)
 	}
 	return sb.String()
 }
@@ -1640,17 +1694,17 @@ func parseEvseMeasurement(measurement string, data string) string {
 		var evseStatusNotification EvseStatusNotification
 		json.Unmarshal([]byte(data), &evseStatusNotification)
 
-		sb.WriteString(`,status=`)
-		sb.WriteString(evseStatusNotification.Status)
 		sb.WriteString(`,vendorId=`)
 		sb.WriteString(evseStatusNotification.VendorId)
-		sb.WriteString(` `)
-		sb.WriteString(`errorCode=`)
+		sb.WriteString(`,errorCode=`)
 		sb.WriteString(evseStatusNotification.ErrorCode)
-		sb.WriteString(`,info=`)
-		sb.WriteString(evseStatusNotification.Info)
-		sb.WriteString(`,vendorErrorCode=`)
-		sb.WriteString(evseStatusNotification.VendorErrorCode)
+		// sb.WriteString(`,vendorErrorCode=`)
+		// sb.WriteString(evseStatusNotification.VendorErrorCode)
+		sb.WriteString(` `)
+		sb.WriteString(`status=`)
+		sb.WriteString(evseStatusNotification.Status)
+		// sb.WriteString(`,info=`)
+		// sb.WriteString(evseStatusNotification.Info)
 
 	case "StartTransaction":
 		var evseStartTransaction EvseStartTransaction
