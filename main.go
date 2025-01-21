@@ -43,7 +43,7 @@ type LnsUp struct {
 	Data  string `json:"data"`
 }
 
-type LnsAlert struct {
+type Alert struct {
 	DeviceId     string `json:"deviceId"`
 	DeviceType   string `json:"deviceType"`
 	Etc          string `json:"etc"`
@@ -1407,7 +1407,7 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 	var lnsUp LnsUp
 	var lnsCommand LnsCommand
 	var lnsImtUp LnsImtUp
-	var lnsAlert LnsAlert
+	var alert Alert
 	// var lnsImtCommand LnsImtCommand
 	var lnsChirpStackV4Up LnsChirpStackV4Up
 	// var lnsChirpstackV4Command LnsChirpstackV4Command
@@ -1594,43 +1594,37 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 	}
 
 	if direction == "alert" {
-		json.Unmarshal([]byte(message), &lnsAlert)
+		json.Unmarshal([]byte(message), &alert)
 
 		var trigger string
 		var triggerAt string
 		var triggerType string
 		var actionSensor string
 
-		if lnsAlert.Trigger != "" {
-			trigger = lnsAlert.Trigger
+		if alert.Trigger != "" {
+			trigger = alert.Trigger
 		} else {
 			trigger = "empty"
 		}
 
-		if lnsAlert.TriggerAt != "" {
-			triggerAt = lnsAlert.TriggerAt
+		if alert.TriggerAt != "" {
+			triggerAt = alert.TriggerAt
 		} else {
 			triggerAt = "empty"
 		}
 
-		if lnsAlert.TriggerType != "" {
-			triggerType = lnsAlert.TriggerType
+		if alert.TriggerType != "" {
+			triggerType = alert.TriggerType
 		} else {
 			triggerType = "empty"
 		}
 
-		if lnsAlert.ActionSensor != "" {
-			actionSensor = lnsAlert.ActionSensor
+		if alert.ActionSensor != "" {
+			actionSensor = alert.ActionSensor
 		} else {
 			actionSensor = "empty"
 		}
 
-		// triggerType
-		// lastPlayed
-		// actionSensor
-		// currentValue
-		// Measurement
-		// sb.WriteString("Lns")
 		sb.WriteString(measurement)
 
 		// Tags
@@ -1643,11 +1637,11 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(`,etc=`)
 		sb.WriteString(etc)
 
-		// unixTimestamp := lnsAlert.LastPlayed.UnixNano()
+		// unixTimestamp := alert.LastPlayed.UnixNano()
 		// Fields
 		sb.WriteString(` `)
 		sb.WriteString(`data="`)
-		sb.WriteString(lnsAlert.Data)
+		sb.WriteString(alert.Data)
 		sb.WriteString(`",trigger="`)
 		sb.WriteString(trigger)
 		sb.WriteString(`",triggerAt="`)
@@ -1656,18 +1650,16 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(triggerType)
 		sb.WriteString(`"`)
 		// sb.WriteString(`",lastPlayed=`)
-		// sb.WriteString(lnsAlert.LastPlayed)
+		// sb.WriteString(alert.LastPlayed)
 		sb.WriteString(`,actionSensor="`)
 		sb.WriteString(actionSensor)
 		sb.WriteString(`",currentValue="`)
-		sb.WriteString(lnsAlert.CurrentValue)
+		sb.WriteString(alert.CurrentValue)
 		sb.WriteString(`"`)
 
 		// Timestamp_ms
 		sb.WriteString(` `)
-		sb.WriteString(strconv.FormatInt(int64(lnsAlert.Timestamp), 10))
-		fmt.Printf("\n\nALERT PAYLOAD: %s", sb.String())
-		fmt.Printf("\n\nALERT TIMESTAMP: %v", lnsAlert.Timestamp)
+		sb.WriteString(strconv.FormatInt(int64(alert.Timestamp), 10))
 	}
 	return sb.String()
 }
@@ -1736,22 +1728,21 @@ func parseEvseMeasurement(measurement string, data string) string {
 	return sb.String()
 }
 
-func parseEvse(featureName string, deviceType string, deviceId string, direction string, etc string, message string) string {
+func parseEvse(measurement string, deviceType string, deviceId string, direction string, etc string, message string) string {
 	var sb strings.Builder
 	var evseUp EvseUp
+	var alert Alert
 
 	if message == "" {
 		return "No message to parse"
 	}
 
 	if direction == "up" {
-		var measurement strings.Builder
 
 		json.Unmarshal([]byte(message), &evseUp)
-		// measurement.WriteString("Evse")
-		measurement.WriteString(featureName)
+
 		// Measurement
-		sb.WriteString(measurement.String())
+		sb.WriteString(measurement)
 
 		// Tags
 		sb.WriteString(`,deviceId=`)
@@ -1781,11 +1772,80 @@ func parseEvse(featureName string, deviceType string, deviceId string, direction
 		// Fields
 		// sb.WriteString(`,fowardEnergy=`)
 		// sb.WriteString(strconv.FormatUint(evseUp.FowardEnergy, 10))
-		sb.WriteString(parseEvseMeasurement(measurement.String(), message))
+		sb.WriteString(parseEvseMeasurement(measurement, message))
 
 		// Timestamp_ns
 		sb.WriteString(` `)
 		sb.WriteString(strconv.FormatInt(evseUp.Timestamp, 10))
+	}
+
+	if direction == "alert" {
+		json.Unmarshal([]byte(message), &alert)
+
+		var trigger string
+		var triggerAt string
+		var triggerType string
+		var actionSensor string
+
+		if alert.Trigger != "" {
+			trigger = alert.Trigger
+		} else {
+			trigger = "empty"
+		}
+
+		if alert.TriggerAt != "" {
+			triggerAt = alert.TriggerAt
+		} else {
+			triggerAt = "empty"
+		}
+
+		if alert.TriggerType != "" {
+			triggerType = alert.TriggerType
+		} else {
+			triggerType = "empty"
+		}
+
+		if alert.ActionSensor != "" {
+			actionSensor = alert.ActionSensor
+		} else {
+			actionSensor = "empty"
+		}
+
+		sb.WriteString(measurement)
+
+		// Tags
+		sb.WriteString(`,deviceType=EVSE`)
+		sb.WriteString(`,deviceId=`)
+		sb.WriteString(deviceId)
+		// sb.WriteString(`,type=alert`)
+		sb.WriteString(`,direction=`)
+		sb.WriteString(direction)
+		sb.WriteString(`,etc=`)
+		sb.WriteString(etc)
+
+		// unixTimestamp := alert.LastPlayed.UnixNano()
+		// Fields
+		sb.WriteString(` `)
+		sb.WriteString(`data="`)
+		sb.WriteString(alert.Data)
+		sb.WriteString(`",trigger="`)
+		sb.WriteString(trigger)
+		sb.WriteString(`",triggerAt="`)
+		sb.WriteString(triggerAt)
+		sb.WriteString(`",triggerType="`)
+		sb.WriteString(triggerType)
+		sb.WriteString(`"`)
+		// sb.WriteString(`",lastPlayed=`)
+		// sb.WriteString(alert.LastPlayed)
+		sb.WriteString(`,actionSensor="`)
+		sb.WriteString(actionSensor)
+		sb.WriteString(`",currentValue="`)
+		sb.WriteString(alert.CurrentValue)
+		sb.WriteString(`"`)
+
+		// Timestamp_ms
+		sb.WriteString(` `)
+		sb.WriteString(strconv.FormatInt(int64(alert.Timestamp), 10))
 	}
 	return sb.String()
 }
@@ -2461,7 +2521,7 @@ func parseHealthPackMeasurement(measurement string, data string) string {
 	return sb.String()
 }
 
-func parseHealthPack(featureName string, deviceType string, deviceId string, direction string, etc string, message string) string {
+func parseHealthPack(measurement string, deviceType string, deviceId string, direction string, etc string, message string) string {
 	var sb strings.Builder
 	var healthPackUp HealthPackUp
 	var healthPackUpProps HealthPackUpProps
@@ -2473,7 +2533,6 @@ func parseHealthPack(featureName string, deviceType string, deviceId string, dir
 	}
 
 	if direction == "up" {
-		var measurement strings.Builder
 		var setUTC strings.Builder
 
 		// JSON to healthPackUp struct
@@ -2482,8 +2541,7 @@ func parseHealthPack(featureName string, deviceType string, deviceId string, dir
 		healthPackUpProps.DeviceIp = healthPackUp.Props.DeviceIp
 		healthPackUpProps.MacAddress = healthPackUp.Props.MacAddress
 
-		measurement.WriteString(featureName)
-		sb.WriteString(measurement.String())
+		sb.WriteString(measurement)
 
 		// Tags
 		sb.WriteString(`,deviceId=`)
@@ -2501,7 +2559,7 @@ func parseHealthPack(featureName string, deviceType string, deviceId string, dir
 		sb.WriteString(etc)
 
 		// Fields
-		sb.WriteString(parseHealthPackMeasurement(measurement.String(), message))
+		sb.WriteString(parseHealthPackMeasurement(measurement, message))
 
 		// Timestamp_ns
 		sb.WriteString(` `)
@@ -2545,7 +2603,7 @@ func parseNspiMeasurement(measurement string, data string) string {
 	return sb.String()
 }
 
-func parseNspi(featureName string, deviceType string, deviceId string, direction string, etc string, message string) string {
+func parseNspi(measurement string, deviceType string, deviceId string, direction string, etc string, message string) string {
 	var sb strings.Builder
 	var nspiUp NspiUp
 
@@ -2557,8 +2615,7 @@ func parseNspi(featureName string, deviceType string, deviceId string, direction
 		var measurement strings.Builder
 
 		json.Unmarshal([]byte(message), &nspiUp)
-		// measurement.WriteString("Evse")
-		measurement.WriteString(featureName)
+
 		// Measurement
 		sb.WriteString(measurement.String())
 
