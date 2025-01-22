@@ -235,7 +235,9 @@ type Port100 struct {
 	X_03_0 float64 `json:"03_0"`
 	X_03_1 float64 `json:"03_1"`
 	X_04   uint64  `json:"04"`
-	X_05   uint64  `json:"05"`
+	X_05_0 float64 `json:"05_0"`
+	X_05_1 float64 `json:"05_1"`
+	X_05_2 float64 `json:"05_2"`
 	X_06   uint64  `json:"06"`
 	X_07   uint64  `json:"07"`
 	X_08   uint64  `json:"08"`
@@ -305,6 +307,15 @@ type SmartLight struct {
 	Movement       uint64  `json:"movement"`
 	BatteryVoltage float64 `json:"battery"`
 	BoardVoltage   float64 `json:"boardVoltage"`
+}
+
+type VibrationAverage struct {
+	Temperature       float64 `json:"temperature"`
+	Humidity          float64 `json:"humidity"`
+	VibrationAverageX float64 `json:"lux"`
+	VibrationAverageY float64 `json:"movement"`
+	VibrationAverageZ float64 `json:"battery"`
+	BoardVoltage      float64 `json:"boardVoltage"`
 }
 
 type WaterTankLevel struct {
@@ -899,23 +910,20 @@ PL: // Parse Loop
 			// 	//   decoded.modules.push(corrente);
 			// 	//   break;
 
-			// 	// case 0x05:
-			// 	//   var gyrox = {};
-			// 	//   gyrox.v = (bytes[index++]<<8) | bytes[index++];
-			// 	//   gyrox.n = "GiroscopioX";
-			// 	//   gyrox.u = "g";
-			// 	//   decoded.modules.push(gyrox);
-			// 	//   var gyroy = {};
-			// 	//   gyroy.v = (bytes[index++]<<8) | bytes[index++];
-			// 	//   gyroy.n = "GiroscopioY";
-			// 	//   gyroy.u = "g";
-			// 	//   decoded.modules.push(gyroy);
-			// 	//   var gyroz = {};
-			// 	//   gyroz.v = (bytes[index++]<<8) | bytes[index++];
-			// 	//   gyroz.n = "GiroscopioZ";
-			// 	//   gyroz.u = "g";
-			// 	//   decoded.modules.push(gyroz);
-			// 	//   break;
+		case 0x05:
+			v := uint64(bytes[i+1]) << 8
+			v |= uint64(bytes[i+2])
+			f := float64(v) / 10
+			port100.X_05_0 = f
+			v = uint64(bytes[i+3]) << 8
+			v |= uint64(bytes[i+4])
+			f = float64(v) / 10
+			port100.X_05_1 = f
+			v = uint64(bytes[i+5]) << 8
+			v |= uint64(bytes[i+6])
+			f = float64(v) / 10
+			port100.X_05_2 = f
+			i = i + 6
 
 			// 	// case 0x06:
 			// 	//   var accx = {};
@@ -1285,6 +1293,72 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 			sb.WriteString(`,boardVoltage=`)
 			sb.WriteString(strconv.FormatFloat(soilMoisture3DepthLevels.BoardVoltage, 'f', -1, 64))
 
+		case "MilkFat":
+			// var smartLight SmartLight
+			// smartLight.Temperature = port100.X_01
+			// smartLight.Humidity = port100.X_02
+			// smartLight.Movement = port100.X_0B
+			// smartLight.Luminosity = float64(port100.X_0D_0)
+			// smartLight.BatteryVoltage = float64(port100.X_0D_1)
+			// smartLight.BoardVoltage = port100.X_0C
+
+			// sb.WriteString(`,temperature=`)
+			// sb.WriteString(strconv.FormatFloat(smartLight.Temperature, 'f', -1, 64))
+			// sb.WriteString(`,humidity=`)
+			// sb.WriteString(strconv.FormatFloat(smartLight.Humidity, 'f', -1, 64))
+			// sb.WriteString(`,movement=`)
+			// sb.WriteString(strconv.FormatUint(uint64(smartLight.Movement), 10))
+			// sb.WriteString(`,luminosity=`)
+			// sb.WriteString(strconv.FormatFloat(smartLight.Luminosity, 'f', -1, 64))
+			// sb.WriteString(`,batteryVoltage=`)
+			// sb.WriteString(strconv.FormatFloat(smartLight.BatteryVoltage, 'f', -1, 64))
+			// sb.WriteString(`,boardVoltage=`)
+			// sb.WriteString(strconv.FormatFloat(smartLight.BoardVoltage, 'f', -1, 64))
+
+		case "GPS":
+			// var smartLight SmartLight
+			// smartLight.Temperature = port100.X_01
+			// smartLight.Humidity = port100.X_02
+			// smartLight.Movement = port100.X_0B
+			// smartLight.Luminosity = float64(port100.X_0D_0)
+			// smartLight.BatteryVoltage = float64(port100.X_0D_1)
+			// smartLight.BoardVoltage = port100.X_0C
+
+			// sb.WriteString(`,temperature=`)
+			// sb.WriteString(strconv.FormatFloat(smartLight.Temperature, 'f', -1, 64))
+			// sb.WriteString(`,humidity=`)
+			// sb.WriteString(strconv.FormatFloat(smartLight.Humidity, 'f', -1, 64))
+			// sb.WriteString(`,movement=`)
+			// sb.WriteString(strconv.FormatUint(uint64(smartLight.Movement), 10))
+			// sb.WriteString(`,luminosity=`)
+			// sb.WriteString(strconv.FormatFloat(smartLight.Luminosity, 'f', -1, 64))
+			// sb.WriteString(`,batteryVoltage=`)
+			// sb.WriteString(strconv.FormatFloat(smartLight.BatteryVoltage, 'f', -1, 64))
+			// sb.WriteString(`,boardVoltage=`)
+			// sb.WriteString(strconv.FormatFloat(smartLight.BoardVoltage, 'f', -1, 64))
+
+		case "VibrationAverage":
+			var vibrationAverage VibrationAverage
+
+			vibrationAverage.Temperature = port100.X_01
+			vibrationAverage.Humidity = port100.X_02
+			vibrationAverage.VibrationAverageX = port100.X_05_0
+			vibrationAverage.VibrationAverageY = port100.X_05_1
+			vibrationAverage.VibrationAverageZ = port100.X_05_2
+			vibrationAverage.BoardVoltage = port100.X_0C
+
+			sb.WriteString(`,temperature=`)
+			sb.WriteString(strconv.FormatFloat(vibrationAverage.Temperature, 'f', -1, 64))
+			sb.WriteString(`,humidity=`)
+			sb.WriteString(strconv.FormatFloat(vibrationAverage.Humidity, 'f', -1, 64))
+			sb.WriteString(`,VibrationAverageX=`)
+			sb.WriteString(strconv.FormatFloat(vibrationAverage.VibrationAverageX, 'f', -1, 64))
+			sb.WriteString(`,VibrationAverageY=`)
+			sb.WriteString(strconv.FormatFloat(vibrationAverage.VibrationAverageY, 'f', -1, 64))
+			sb.WriteString(`,VibrationAverageZ=`)
+			sb.WriteString(strconv.FormatFloat(vibrationAverage.VibrationAverageZ, 'f', -1, 64))
+			sb.WriteString(`,boardVoltage=`)
+			sb.WriteString(strconv.FormatFloat(vibrationAverage.BoardVoltage, 'f', -1, 64))
 		default:
 		}
 
@@ -1661,6 +1735,8 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(` `)
 		sb.WriteString(strconv.FormatInt(int64(alert.Timestamp), 10))
 	}
+
+	fmt.Printf("\n\nParsedLns: %s", sb.String())
 	return sb.String()
 }
 
