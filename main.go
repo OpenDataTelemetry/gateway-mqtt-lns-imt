@@ -1736,7 +1736,6 @@ func parseLns(measurement string, deviceId string, direction string, etc string,
 		sb.WriteString(strconv.FormatInt(int64(alert.Timestamp), 10))
 	}
 
-	fmt.Printf("\n\nParsedLns: %s", sb.String())
 	return sb.String()
 }
 
@@ -2829,7 +2828,6 @@ func main() {
 		// 2. Process
 		// 2.1. Process Topic
 		s := strings.Split(incoming[0], "/")
-		fmt.Printf("\nTopic: %s", incoming[0])
 		// OpenDataTelemetry/IMT/LNS/MEASUREMENT/DEVICE_ID/up/imt
 		// OpenDataTelemetry/IMT/LNS/MEASUREMENT/DEVICE_ID/down/chirpstackv4
 		organization := s[1]
@@ -2863,15 +2861,16 @@ func main() {
 		case "IMT":
 			switch deviceType {
 			case "LNS":
-				// var influx Influx
 				kafkaMessage = parseLns(measurement, deviceId, direction, etc, incoming[1])
-				// fmt.Printf("\nMessage: %s", kafkaMessage)
 
 			case "EVSE":
 				kafkaMessage = parseEvse(measurement, deviceType, deviceId, direction, etc, incoming[1])
 
 			case "NSPI":
 				kafkaMessage = parseNspi(measurement, deviceType, deviceId, direction, etc, incoming[1])
+
+			case "HealthPack":
+				kafkaMessage = parseHealthPack(measurement, deviceType, deviceId, direction, etc, incoming[1])
 
 			default:
 			}
@@ -2880,13 +2879,12 @@ func main() {
 			case "HealthPack":
 				kafkaMessage = parseHealthPack(measurement, deviceType, deviceId, direction, etc, incoming[1])
 			}
-
-			fmt.Printf("\nMessage: %s", kafkaMessage)
 		}
 
-		// return influx line protocol
-		// measurement,tags fields timestamp
-		// fmt.Printf("InfluxLineProtocol: %s\n", kafkaMessage)
+		fmt.Printf("\n>>>>")
+		fmt.Printf("\nTopic: %s", incoming[0])
+		fmt.Printf("\nMessage: %s", kafkaMessage)
+		fmt.Printf("\n>>>>")
 
 		// SET KAFKA
 		// KafkaProducerClient
