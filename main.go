@@ -230,7 +230,14 @@ type LnsChirpstackV4Command struct {
 }
 
 type Port100 struct {
-	X_01   float64 `json:"01"`
+	X_01_0 float64 `json:"01_0"`
+	X_01_1 float64 `json:"01_1"`
+	X_01_2 float64 `json:"01_2"`
+	X_01_3 float64 `json:"01_3"`
+	X_01_4 float64 `json:"01_4"`
+	X_01_5 float64 `json:"01_5"`
+	X_01_6 float64 `json:"01_6"`
+	X_01_7 float64 `json:"01_7"`
 	X_02   float64 `json:"02"`
 	X_03_0 float64 `json:"03_0"`
 	X_03_1 float64 `json:"03_1"`
@@ -376,6 +383,18 @@ type SoilMoisture3DepthLevels struct {
 	SoilMoistureDepthLevel2 uint64  `json:"soilMoistureDepthLevel2"`
 	SoilMoistureDepthLevel3 uint64  `json:"soilMoistureDepthLevel3"`
 	BoardVoltage            float64 `json:"boardVoltage"`
+}
+
+type Temperature8Point struct {
+	Temperature1 float64 `json:"temperature1"`
+	Temperature2 float64 `json:"temperature2"`
+	Temperature3 float64 `json:"temperature3"`
+	Temperature4 float64 `json:"temperature4"`
+	Temperature5 float64 `json:"temperature5"`
+	Temperature6 float64 `json:"temperature6"`
+	Temperature7 float64 `json:"temperature7"`
+	Temperature8 float64 `json:"temperature8"`
+	BoardVoltage float64 `json:"boardVoltage"`
 }
 
 type LnsChirpStackV4Up struct {
@@ -855,6 +874,7 @@ func protocolParserPort100(bytes []byte) string {
 	_0d := 0
 	_0e := 0
 	_03 := 0
+	_01 := 0
 
 PL: // Parse Loop
 	for i := 0; i < len; i++ {
@@ -863,11 +883,71 @@ PL: // Parse Loop
 		// fmt.Println("00")
 
 		case 0x01:
-			v := uint64(bytes[i+1]) << 8
-			v |= uint64(bytes[i+2])
-			f := float64(v) / 10
-			i = i + 2
-			port100.X_01 = f
+			switch _01 {
+			case 0:
+				v := uint64(bytes[i+1]) << 8
+				v |= uint64(bytes[i+2])
+				f := float64(v) / 10
+				i = i + 2
+				_01 = _01 + 1
+				port100.X_01_0 = f
+
+			case 1:
+				v := uint64(bytes[i+1]) << 8
+				v |= uint64(bytes[i+2])
+				f := float64(v) / 10
+				i = i + 2
+				_01 = _01 + 1
+				port100.X_01_1 = f
+
+			case 2:
+				v := uint64(bytes[i+1]) << 8
+				v |= uint64(bytes[i+2])
+				f := float64(v) / 10
+				i = i + 2
+				_01 = _01 + 1
+				port100.X_01_2 = f
+
+			case 3:
+				v := uint64(bytes[i+1]) << 8
+				v |= uint64(bytes[i+2])
+				f := float64(v) / 10
+				i = i + 2
+				_01 = _01 + 1
+				port100.X_01_3 = f
+
+			case 4:
+				v := uint64(bytes[i+1]) << 8
+				v |= uint64(bytes[i+2])
+				f := float64(v) / 10
+				i = i + 2
+				_01 = _01 + 1
+				port100.X_01_4 = f
+
+			case 5:
+				v := uint64(bytes[i+1]) << 8
+				v |= uint64(bytes[i+2])
+				f := float64(v) / 10
+				i = i + 2
+				_01 = _01 + 1
+				port100.X_01_5 = f
+
+			case 6:
+				v := uint64(bytes[i+1]) << 8
+				v |= uint64(bytes[i+2])
+				f := float64(v) / 10
+				i = i + 2
+				_01 = _01 + 1
+				port100.X_01_6 = f
+
+			case 7:
+				v := uint64(bytes[i+1]) << 8
+				v |= uint64(bytes[i+2])
+				f := float64(v) / 10
+				i = i + 2
+				_01 = _01 + 1
+				port100.X_01_7 = f
+			}
 
 		case 0x02:
 			v := uint64(bytes[i+1]) << 8
@@ -1173,7 +1253,7 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 		switch measurement {
 		case "SmartLight":
 			var smartLight SmartLight
-			smartLight.Temperature = port100.X_01
+			smartLight.Temperature = port100.X_01_0
 			smartLight.Humidity = port100.X_02
 			smartLight.Movement = port100.X_0B
 			smartLight.Luminosity = float64(port100.X_0D_0)
@@ -1295,7 +1375,7 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 
 		case "MilkFat":
 			// var smartLight SmartLight
-			// smartLight.Temperature = port100.X_01
+			// smartLight.Temperature = port100.X_01_0
 			// smartLight.Humidity = port100.X_02
 			// smartLight.Movement = port100.X_0B
 			// smartLight.Luminosity = float64(port100.X_0D_0)
@@ -1317,7 +1397,7 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 
 		case "GPS":
 			// var smartLight SmartLight
-			// smartLight.Temperature = port100.X_01
+			// smartLight.Temperature = port100.X_01_0
 			// smartLight.Humidity = port100.X_02
 			// smartLight.Movement = port100.X_0B
 			// smartLight.Luminosity = float64(port100.X_0D_0)
@@ -1337,10 +1417,81 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 			// sb.WriteString(`,boardVoltage=`)
 			// sb.WriteString(strconv.FormatFloat(smartLight.BoardVoltage, 'f', -1, 64))
 
+		case "Temperature8Point":
+			var temperature8Point Temperature8Point
+			auxTemperature1 := uint64(port100.X_01_2 * 10)
+			auxTemperature2 := uint64(port100.X_01_3 * 10)
+			auxTemperature3 := uint64(port100.X_01_4 * 10)
+			auxTemperature4 := uint64(port100.X_01_5 * 10)
+			auxTemperature5 := uint64(port100.X_01_6 * 10)
+			auxTemperature6 := uint64(port100.X_01_7 * 10)
+			auxTemperature7 := uint64(port100.X_01_1 * 10)
+			auxTemperature8 := uint64(port100.X_01_0 * 10)
+
+			if auxTemperature1&0x8000 > 0 {
+				auxTemperature1 = auxTemperature1 - 0x10000
+			}
+			temperature8Point.Temperature1 = float64(auxTemperature1+3) / 10
+
+			if auxTemperature2&0x8000 > 0 {
+				auxTemperature2 = auxTemperature2 - 0x10000
+			}
+			temperature8Point.Temperature2 = float64(auxTemperature2+7) / 10
+
+			if auxTemperature3&0x8000 > 0 {
+				auxTemperature3 = auxTemperature3 - 0x10000
+			}
+			temperature8Point.Temperature3 = float64(auxTemperature3+3) / 10
+
+			if auxTemperature4&0x8000 > 0 {
+				auxTemperature4 = auxTemperature4 - 0x10000
+			}
+			temperature8Point.Temperature4 = float64(auxTemperature4+4) / 10
+
+			if auxTemperature5&0x8000 > 0 {
+				auxTemperature5 = auxTemperature5 - 0x10000
+			}
+			temperature8Point.Temperature5 = float64(auxTemperature5+6) / 10
+
+			if auxTemperature6&0x8000 > 0 {
+				auxTemperature6 = auxTemperature6 - 0x10000
+			}
+			temperature8Point.Temperature6 = float64(auxTemperature6+6) / 10
+
+			if auxTemperature7&0x8000 > 0 {
+				auxTemperature7 = auxTemperature7 - 0x10000
+			}
+			temperature8Point.Temperature7 = float64(auxTemperature7+7) / 10
+
+			if auxTemperature8&0x8000 > 0 {
+				auxTemperature8 = auxTemperature8 - 0x10000
+			}
+			temperature8Point.Temperature8 = float64(auxTemperature8-18) / 10
+
+			temperature8Point.BoardVoltage = port100.X_0C
+
+			sb.WriteString(`,temperature1=`)
+			sb.WriteString(strconv.FormatFloat(temperature8Point.Temperature1, 'f', -1, 64))
+			sb.WriteString(`,temperature2=`)
+			sb.WriteString(strconv.FormatFloat(temperature8Point.Temperature2, 'f', -1, 64))
+			sb.WriteString(`,temperature3=`)
+			sb.WriteString(strconv.FormatFloat(temperature8Point.Temperature3, 'f', -1, 64))
+			sb.WriteString(`,temperature4=`)
+			sb.WriteString(strconv.FormatFloat(temperature8Point.Temperature4, 'f', -1, 64))
+			sb.WriteString(`,temperature5=`)
+			sb.WriteString(strconv.FormatFloat(temperature8Point.Temperature5, 'f', -1, 64))
+			sb.WriteString(`,temperature6=`)
+			sb.WriteString(strconv.FormatFloat(temperature8Point.Temperature6, 'f', -1, 64))
+			sb.WriteString(`,temperature7=`)
+			sb.WriteString(strconv.FormatFloat(temperature8Point.Temperature7, 'f', -1, 64))
+			sb.WriteString(`,temperature8=`)
+			sb.WriteString(strconv.FormatFloat(temperature8Point.Temperature8, 'f', -1, 64))
+			sb.WriteString(`,boardVoltage=`)
+			sb.WriteString(strconv.FormatFloat(temperature8Point.BoardVoltage, 'f', -1, 64))
+
 		case "VibrationAverage":
 			var vibrationAverage VibrationAverage
-
-			vibrationAverage.Temperature = port100.X_01
+			vibrationAverage.Temperature = port100.X_01_0
 			vibrationAverage.Humidity = port100.X_02
 			vibrationAverage.VibrationAverageX = port100.X_05_0
 			vibrationAverage.VibrationAverageY = port100.X_05_1
@@ -1351,11 +1502,11 @@ func parseLnsMeasurement(measurement string, data string, port uint64) string {
 			sb.WriteString(strconv.FormatFloat(vibrationAverage.Temperature, 'f', -1, 64))
 			sb.WriteString(`,humidity=`)
 			sb.WriteString(strconv.FormatFloat(vibrationAverage.Humidity, 'f', -1, 64))
-			sb.WriteString(`,VibrationAverageX=`)
+			sb.WriteString(`,vibrationAverageX=`)
 			sb.WriteString(strconv.FormatFloat(vibrationAverage.VibrationAverageX, 'f', -1, 64))
-			sb.WriteString(`,VibrationAverageY=`)
+			sb.WriteString(`,vibrationAverageY=`)
 			sb.WriteString(strconv.FormatFloat(vibrationAverage.VibrationAverageY, 'f', -1, 64))
-			sb.WriteString(`,VibrationAverageZ=`)
+			sb.WriteString(`,vibrationAverageZ=`)
 			sb.WriteString(strconv.FormatFloat(vibrationAverage.VibrationAverageZ, 'f', -1, 64))
 			sb.WriteString(`,boardVoltage=`)
 			sb.WriteString(strconv.FormatFloat(vibrationAverage.BoardVoltage, 'f', -1, 64))
